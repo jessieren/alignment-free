@@ -22,7 +22,7 @@ To use the program,
 
 > g++ countKmer.cpp -o countKmer.out
 
-> ./countKmer.out -k k-tuple length -i input fasta/fastq file -s short name -o output directory -q fastq? -z output words with zero count? -d count for double strands? -l input file is ref seq? -p input file has no annotation?
+> ./countKmer.out -k k-tupleLength -i input fasta/fastqFilePathName -s shortName -o outputDirectory -q fastq? -z outputZeroCountWords? -d countForDoubleStrands? -l inputFileRefSeq? -p inputFileNoAnnotation?
 
 
 The second step is to compute multiple alignment-free sequence comparison meausres. The corresponding program is "computeD2MC_multiStat.cpp".
@@ -32,7 +32,7 @@ To use the program,
 
 > g++ computeD2MC_multiStat.cpp -o computeD2MC_multiStat.out
 
-> ./computeD2MC_multiStat.out -a name of species1> -b MC order of species1> -c name of species2> -d MC order of species2> -k k-tuple length> -i directory to kmer count output files of species1> -j directory to kmer count output files of species2> -o output directory>
+> ./computeD2MC_multiStat.out -a speciesName1 -b speciesOrder1 -c speciesName2 -d speciesOrder2 -k k-tupleLength -i directory/to/species1/kmerCount/OutputFiles -j directory/to/species2/kmerCount/OutputFiles -o outputDirectory
 
 
 For some measures such as d2star, d2shepp and EuF, they model the genome sequence using Markov chain (MC) model. To fit the data with MC, we first need to estimte the order of MC. For a given long genome sequence, we estimate the order of MC using AIC and BIC criteria. The corresponding program is "computeAICBIC.cpp". 
@@ -42,7 +42,7 @@ To use the program,
 
 > g++ computeAICBIC.cpp -o computeAICBIC.out
 
-> ./computeAICBIC.out -a name of species> -b k-tuple length> -i directory to kmer count output files of the species> -o output directory>
+> ./computeAICBIC.out -a speciesName -b k-tupleLength -i directory/to/species1/kmerCount/OutputFiles -o outputDirectory
 
 
 

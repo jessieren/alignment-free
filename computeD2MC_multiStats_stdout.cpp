@@ -1417,7 +1417,6 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 	char *inputFileDir[2];
 	inputFileDir[0] = NULL;
 	inputFileDir[1] = NULL;
-	char *outputFileDir = NULL;
 	
 	
 	/* getOptions from command line */
@@ -1436,13 +1435,12 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			{"kvalue",  required_argument, 0, 'k'},
 			{"inputFileDir1",  required_argument, 0, 'i'},
 			{"inputFileDir2",  required_argument, 0, 'j'},
-			{"outputFileDir",  required_argument, 0, 'o'},
 			{0,         0,                 0,  0 }
 		};
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "a:b:c:d:k:i:j:o:",
+		c = getopt_long (argc, argv, "a:b:c:d:k:i:j:",
 										 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -1495,11 +1493,6 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 				//printf ("option -j, the input kmer count file directory, with value `%s'\n", optarg);
 				break;
 				
-			case 'o':
-				outputFileDir = optarg;
-				//printf ("option -o, the output directory, with value `%s'\n", optarg);
-				break;
-				
 			case '?':
 				/* getopt_long already printed an error message. */
 				break;
@@ -1520,32 +1513,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		}
 	}
 	
-	if (outputFileDir != NULL) {
-		std::string outputPath = outputFileDir;
-		if (outputPath[outputPath.length()-1] != '/') {
-			strcat(outputFileDir,"/");
-		}
-		//cout << "outputFileDir: " << outputFileDir << endl;
-		
-		// 0520 if outputFileDir not exist, mkdir
-		struct stat st;
-		if(stat(outputFileDir, &st) != 0)
-		{
-			//printf(" mkdir outputFileDir \n");
-			char mkcmd[100];
-			sprintf(mkcmd, "mkdir -p %s", outputFileDir);
-			system(mkcmd);
-		}
-		
-		//int status = mkdir (outputFileDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		//if( status == -1 )
-		//{
-		//	cout << "WARNING: outputFileDir already exists. " << endl;
-		//}
-		
-	}
-	
-	
+
 	
 	///////////////////////////////////////////////////////////////////////
 	//////////////////// load the kmerFiles and compute pwMC //////////////
@@ -1634,26 +1602,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
   ///////////////////////////////////////////////////////////////////////  
   ////////////////////// computing the multiple statistics //////////////
   ///////////////////////////////////////////////////////////////////////
-  char outputfile[1000];
-  char orderstrA[5];
-  sprintf(orderstrA, "%d", order[0]);
-  char orderstrB[5];
-  sprintf(orderstrB, "%d", order[1]);
-  
-  strcpy(outputfile, outputFileDir);
-  strcat(outputfile, "k");
-  strcat(outputfile,kstr);
-  strcat(outputfile,"_");
-  strcat(outputfile,speciesName[0]);
-  strcat(outputfile,"_order");
-  strcat(outputfile,orderstrA);
-  strcat(outputfile,"_");
-  strcat(outputfile,speciesName[1]);
-  strcat(outputfile,"_order");
-  strcat(outputfile,orderstrB);
-  strcat(outputfile,"_statScores");
-  //ofstream fout(outputfile);
-  
+
 	
   // 1. compute the D2 statistics
 	string D2StatNames[12] = {"D2", "d2", "D2star", "d2star", "D2shepp", "d2shepp", "D2NGS", "d2NGS", "D2starNGS", "d2starNGS", "D2sheppNGS", "d2sheppNGS"} ;

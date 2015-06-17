@@ -489,7 +489,7 @@ void loadKmerCountHash(char *currentKmerFilePathName, int speciesID, string kmer
 }
 
 
-
+// find the reverse compilmentary of a word
 vector<int> reverseFour(vector<int> Four)
 {
   vector<int> reverseFour(Four.size(), 4);
@@ -644,7 +644,7 @@ void pwMC(int ZI, int k, int order, int speciesID, vector<SCIENTIFIC_NUMBER>& in
 }
 
 
-
+// compute D2C2 using single strand
 vector<double> D2C2computeLongseq(int ZI, int k)
 {
   // compute D2 statistics
@@ -749,7 +749,7 @@ vector<double> D2C2computeLongseq(int ZI, int k)
 
 
 
-
+// compute D2C2 using double strand
 vector<double> D2C2computeNGS(int ZI, int k)
 {
   // compute D2 statistics
@@ -852,7 +852,7 @@ vector<double> D2C2computeNGS(int ZI, int k)
 
 
 
-
+// compute Eu Ma Ch using double strand
 vector<double> EuMaChDistNGS(int ZI, int k)
 {
   //cout << TransToReal(D2) << endl;
@@ -894,7 +894,7 @@ vector<double> EuMaChDistNGS(int ZI, int k)
 
 
 
-
+// compute EuF: normalize freq by expected word count
 vector<double> modifiedEuDistNGS(int ZI, int k)
 {
 	//cout << TransToReal(D2) << endl;
@@ -1182,7 +1182,7 @@ double WillnerDiNGS(int ZI, int k)
 
 
 
-
+// compute Hao dissimilarity
 /// need to write it as complimentary chains
 double HAOcompute(int ZI, int k)
 {
@@ -1267,7 +1267,7 @@ double HAOcompute(int ZI, int k)
 
 
 
-
+// Jensen–Shannon divergence under IID model
 double JScomputeIID(vector<SCIENTIFIC_NUMBER>& iniProb)
 {
   int size = iniProb.size();
@@ -1291,7 +1291,7 @@ double JScomputeIID(vector<SCIENTIFIC_NUMBER>& iniProb)
 
 
 
-
+// Jensen–Shannon divergence under MC model
 double JScomputeMC(vector<SCIENTIFIC_NUMBER>& iniProb, vector< vector<SCIENTIFIC_NUMBER> >& transMatrix)
 {
   int transRowSize = iniProb.size();
@@ -1326,7 +1326,7 @@ double JScomputeMC(vector<SCIENTIFIC_NUMBER>& iniProb, vector< vector<SCIENTIFIC
 
 
 
-
+// S2 measure
 // not necessary to make it to include complimentary
 double S2compute(int ZI, int k)
 {

@@ -75,11 +75,18 @@ struct KMERINFO
 	unsigned long totalK_2;
 	unsigned long totalOrder;
 	unsigned long totalOrder_1;
+	
+	vector< vector<SCIENTIFIC_NUMBER> > *transMatrixPointer;
+	vector<SCIENTIFIC_NUMBER> *iniProbPointer;
 };
 
 
+//KMERINFO.p = new vector<vector> transMatrixNew(col, row)
+//transMatrixNew = transmatrix
+//*KMERINFO.p[colNum][rowNum]
 
-
+//vector< vector<SCIENTIFIC_NUMBER> > transMatrix(transRowSize, vector<SCIENTIFIC_NUMBER>(transColSize));
+//vector<SCIENTIFIC_NUMBER> iniProb;
 
 
 // Scientific Number calculation funtion:
@@ -452,7 +459,7 @@ int four2ten(vector<int> four, int k)
 
 
 
-void loadKmerCountHash(string currentKmerFilePathName, KmerInfo* speciesKmerInfo, string kmerUsage)
+void loadKmerCountHash(string currentKmerFilePathName, KMERINFO* speciesKmerInfo, string kmerUsage)
 {
 	ifstream fin(currentKmerFilePathName.c_str());
 	string currentKmerLine;
@@ -492,6 +499,46 @@ void loadKmerCountHash(string currentKmerFilePathName, KmerInfo* speciesKmerInfo
 	return;
 	
 }
+
+
+
+
+
+void loadSpeciesInfo(string speciesInfoFilePathName, vector<SPECIESINFO>& speciesInfoList)
+{
+	ifstream fin(speciesInfoFilePathName.c_str());
+	string currentSpeciesLine;
+	while(getline(fin, currentSpeciesLine, '\n'))
+	{
+		string currentName; string currentDir; int currentOrder;
+		std::istringstream ss(currentSpeciesLine);
+		std::string token;
+		int colCount = 0;
+		while(std::getline(ss, token, ' ')) {
+			colCount++;
+			if(colCount == 1){
+				currentName = token;
+			}else if(colCount == 2){
+				currentDir = token;
+				if (currentDir[currentDir.length()-1] != '/')
+				{
+					currentDir = currentDir + "/";
+				}
+			}else{
+				currentOrder = atoi(token.c_str());
+			}//std::cout << token << '\n';
+		}
+		SPECIESINFO currentSpeciesInfo;
+		currentSpeciesInfo.name = currentName;
+		currentSpeciesInfo.dir = currentDir;
+		currentSpeciesInfo.order = currentOrder;
+		//cout << "speciesInfo.name:" << currentSpeciesInfo.name << ", dir:" << currentSpeciesInfo.dir << ", oroder:" << currentSpeciesInfo.order << endl;
+		speciesInfoList.push_back(currentSpeciesInfo);
+	}
+	
+	return;
+}
+
 
 
 
@@ -542,6 +589,7 @@ void pwIID(int ZI, int k, KMERINFO* speciesKmerInfo)
 
 void pwMC(int ZI, int k, int order, KMERINFO* speciesKmerInfo, vector<SCIENTIFIC_NUMBER>& iniProb, vector< vector<SCIENTIFIC_NUMBER> > &transMatrix)
 {
+	
   // compute the transition probability matrix
   int transColSize = ZI;
   int transRowSize = pow(ZI, order);
@@ -605,8 +653,15 @@ void pwMC(int ZI, int k, int order, KMERINFO* speciesKmerInfo, vector<SCIENTIFIC
       
     }
   }
-  
-
+	
+	
+	//vector<SCIENTIFIC_NUMBER> *iniProbPointer = &iniProb;
+	//cout << "iniProb[0]" << TransToReal(iniProb[0]) << endl;
+	//cout << TransToReal((*iniProbPointer)[0]) << endl;
+	
+	//speciesKmerInfo->iniProbPointer = &iniProb;
+	//cout << TransToReal((*(speciesKmerInfo->iniProbPointer))[0]) << endl;
+	//speciesKmerInfo->transMatrixPointer = &transMatrix;
   
   
   // compute pw for each kmer word
@@ -645,16 +700,16 @@ void pwMC(int ZI, int k, int order, KMERINFO* speciesKmerInfo, vector<SCIENTIFIC
       //cout << pw.value << ", " << pw.factor << endl;
     }
     
-    HashPw[speciesID][currentKmerTen] = pw;
+    speciesKmerInfo->HashPw[currentKmerTen] = pw;
     //printFour(currentKmerFour);
     //cout << " pw:" << TransToReal(pw) << endl;
   }
-  
+	
 }
 
 
 
-vector<double> D2C2computeLongseq(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB)
+vector<double> D2C2computeLongseq(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
   // compute D2 statistics
   SCIENTIFIC_NUMBER D2, D2star, D2shepp;
@@ -765,7 +820,7 @@ vector<double> D2C2computeLongseq(int ZI, int k, KmerInfo* speciesKmerInfoA, Kme
 
 
 
-vector<double> D2C2computeNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB)
+vector<double> D2C2computeNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
   // compute D2 statistics
   SCIENTIFIC_NUMBER D2, D2star, D2shepp;
@@ -874,7 +929,7 @@ vector<double> D2C2computeNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInf
 
 
 
-vector<double> EuMaChDistNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB)
+vector<double> EuMaChDistNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
   //cout << TransToReal(D2) << endl;
   SCIENTIFIC_NUMBER EuDist ; EuDist.value=0; EuDist.factor=0;
@@ -916,7 +971,7 @@ vector<double> EuMaChDistNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo
 
 
 
-vector<double> modifiedEuDistNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB)
+vector<double> modifiedEuDistNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
 	//cout << TransToReal(D2) << endl;
 	// expected under MC model, divide
@@ -976,7 +1031,7 @@ vector<double> modifiedEuDistNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, Kmer
 
 
 // Willner et al. Di, Tri, Tetra
-double WillnerDiNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB )
+double WillnerDiNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB )
 {
   
   double deltaDi = 0;
@@ -1205,7 +1260,7 @@ double WillnerDiNGS(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* species
 
 
 /// need to write it as complimentary chains
-double HAOcompute(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB)
+double HAOcompute(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
   SCIENTIFIC_NUMBER HAO_above;
   HAO_above.value = 0; HAO_above.factor = 0;
@@ -1252,7 +1307,7 @@ double HAOcompute(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKm
 				speciesKmerInfo = speciesKmerInfoB;
 			
       SCIENTIFIC_NUMBER pw0; pw0.value = 0; pw0.factor = 0;
-      if(HashTableK_2[speciesID][currentKmerRemoveTwoTen] != 0)
+      if(speciesKmerInfo->HashTableK_2[currentKmerRemoveTwoTen] != 0)
       {
         //cout << "HashTableK_1 " << "species " << speciesID << " word " << currentKmerRemoveLastTen << " kmercount " << HashTableK_1[speciesID][currentKmerRemoveLastTen] << " totalK_1 " << totalK_1[speciesID] << "; " << HashTableK_1[speciesID][currentKmerRemoveFirstTen] << " totalK_1 " << totalK_1[speciesID] << "; " << HashTableK_2[speciesID][currentKmerRemoveTwoTen] << " totalK_2 " << totalK_2[speciesID] << endl;
         SCIENTIFIC_NUMBER pw0_up1 = TransToScientific(speciesKmerInfo->HashTableK_1[currentKmerRemoveLastTen]/double(speciesKmerInfo->totalK_1));
@@ -1355,7 +1410,7 @@ double JScomputeMC(vector<SCIENTIFIC_NUMBER>& iniProb, vector< vector<SCIENTIFIC
 
 
 // not necessary to make it to include complimentary
-double S2compute(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKmerInfoB)
+double S2compute(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
 
   //cout << TransToReal(D2) << endl;
@@ -1441,15 +1496,19 @@ double S2compute(int ZI, int k, KmerInfo* speciesKmerInfoA, KmerInfo* speciesKme
 int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 {
 	//bool doubleStrand = false;
-	char *speciesName[2];
-	vector<int> order(2,0);
-	
+	//char *speciesName[2];
+
 	int k = 0;
 	char kstr[5];
 	
-	char *inputFileDir[2];
-	inputFileDir[0] = NULL;
-	inputFileDir[1] = NULL;
+	string speciesInfoFilePathNameA;
+	string speciesInfoFilePathNameB;
+	
+	//vector<int> order(2,0);
+	
+	//char *inputFileDir[2];
+	//inputFileDir[0] = NULL;
+	//inputFileDir[1] = NULL;
 	
 	
 	/* getOptions from command line */
@@ -1461,10 +1520,10 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		{
 			//{"doubleStrand",     no_argument,       0, 'd'},
 			// necessary arguments: kvalue and inputFileName !!
-			{"species1",  required_argument, 0, 'a'},
-			{"order1",  required_argument, 0, 'b'},
-			{"species2",  required_argument, 0, 'c'},
-			{"order2",  required_argument, 0, 'd'},
+			//{"species1",  required_argument, 0, 'a'},
+			//{"order1",  required_argument, 0, 'b'},
+			//{"species2",  required_argument, 0, 'c'},
+			//{"order2",  required_argument, 0, 'd'},
 			{"kvalue",  required_argument, 0, 'k'},
 			{"inputFileDir1",  required_argument, 0, 'i'},
 			{"inputFileDir2",  required_argument, 0, 'j'},
@@ -1473,7 +1532,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "a:b:c:d:k:i:j:",
+		c = getopt_long (argc, argv, "k:i:j:",
 										 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -1490,25 +1549,25 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 				
 			/* input kmer files should be singleStrand count! */
 			 
-			case 'a':
-				speciesName[0] = optarg;
+			//case 'a':
+				//speciesName[0] = optarg;
 				//printf ("option -a, name of 1st species, with value `%s'\n", optarg);
-				break;
+				//break;
 				
-			case 'b':
-				order[0] = atoi(optarg);
+			//case 'b':
+			//	order[0] = atoi(optarg);
 				//printf ("option -b, order of 1st species, with value `%s'\n", optarg);
-				break;
+				//break;
 				
-			case 'c':
-				speciesName[1] = optarg;
+			//case 'c':
+				//speciesName[1] = optarg;
 				//printf ("option -c, name of 2nd species, with value `%s'\n", optarg);
-				break;
+				//break;
 				
-			case 'd':
-				order[1] = atoi(optarg);
+			//case 'd':
+				//order[1] = atoi(optarg);
 				//printf ("option -d, order of 2nd species, with value `%s'\n", optarg);
-				break;
+				//break;
 				
 			case 'k':
 				k = atoi(optarg) ;
@@ -1517,12 +1576,12 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 				break;
 				
 			case 'i':
-				inputFileDir[0] = optarg;
+				speciesInfoFilePathNameA = string(optarg);
 				//printf ("option -i, the input kmer count file directory, with value `%s'\n", optarg);
 				break;
 				
 			case 'j':
-				inputFileDir[1] = optarg;
+				speciesInfoFilePathNameB = string(optarg);
 				//printf ("option -j, the input kmer count file directory, with value `%s'\n", optarg);
 				break;
 				
@@ -1535,133 +1594,159 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		}
 	}
 
-	for(int speciesID=0; speciesID < 2; speciesID++)
-	{
-		if (inputFileDir[speciesID] != NULL) {
-			std::string inputPath = inputFileDir[speciesID];
-			if (inputPath[inputPath.length()-1] != '/') {
-				strcat(inputFileDir[speciesID],"/");
-			}
-			//cout << "inputFileDir: " << inputFileDir[speciesID] << endl;
-		}
-	}
 	
 
+	///////////////////////////////////////////////////////////////////////
+	//////////////////// load the species information /////////////////////
+	///////////////////////////////////////////////////////////////////////
+	vector<SPECIESINFO> speciesInfoListA;
+	loadSpeciesInfo(speciesInfoFilePathNameA, speciesInfoListA);
 	
-	vector<SPECIESINFO> speciesInfoListA
+	vector<SPECIESINFO> speciesInfoListB;
+	loadSpeciesInfo(speciesInfoFilePathNameB, speciesInfoListB);
 	
+
 	
 	///////////////////////////////////////////////////////////////////////
 	//////////////////// load the kmerFiles and compute pwMC //////////////
 	///////////////////////////////////////////////////////////////////////
 
-  vector<SCIENTIFIC_NUMBER> iniProbA;
-  vector<vector<vector<SCIENTIFIC_NUMBER> > > transMatrix (2, vector<vector<SCIENTIFIC_NUMBER> > (pow(ZI,order[1]), vector<SCIENTIFIC_NUMBER> (ZI)));
+  //vector<SCIENTIFIC_NUMBER> iniProbA;
+  //vector<vector<vector<SCIENTIFIC_NUMBER> > > transMatrix (2, vector<vector<SCIENTIFIC_NUMBER> > (pow(ZI,order[1]), vector<SCIENTIFIC_NUMBER> (ZI)));
   
-  // load the kmer count hashtables of the two dataset
+  // load the kmer count hashtables of the first file list (the fat list)
+	// those files are only loaded once. They will be repeatedly used for many times
+	// how many files you put on this list depend on the memory size
+	vector<KMERINFO*> speciesKmerInfoListA( speciesInfoListA.size() );
+	for(int IDA = 0; IDA < speciesInfoListA.size(); IDA++)
+	{
+		// initialization
+		speciesKmerInfoListA[IDA] = new KMERINFO();
+	}
 	
 	for(int IDA = 0; IDA < speciesInfoListA.size(); IDA++)
 	{
-		orderA <- speciesInfoListA[IDA]->order
+		int orderA = speciesInfoListA[IDA].order;
 		char orderstrA[5];
 		sprintf(orderstrA, "%d", orderA);
 		char order1strA[5];
 		sprintf(order1strA, "%d", (orderA+1));
 		
-		cout << "======= species " << speciesInfoListA[IDA]->name << " order " << orderA << endl;
-		KMERINFO* speciesKmerInfoA = new KMERINFO();
-		std::string kmerFilePathNameA = speciesInfoListA[IDA]->dir + speciesInfoListA[IDA]->name + "_k" + kstr + "_singleStrand_wordcount";
-		loadKmerCountHash(kmerFilePathNameA, speciesKmerInfoA, "kmerCount");
-		
+		cout << "======= species " << speciesInfoListA[IDA].name << " order " << orderA << endl;
+		//KMERINFO* speciesKmerInfoA = new KMERINFO();
+		std::string kmerFilePathNameA = speciesInfoListA[IDA].dir + speciesInfoListA[IDA].name + "_k" + kstr + "_singleStrand_wordcount";
+		loadKmerCountHash(kmerFilePathNameA, speciesKmerInfoListA[IDA], "kmerCount");
 
-		if(order == 0)
+		if(orderA == 0)
 		{
 			// load the 1-kmer count for MC: k=order+1
 			//cout << "== load the kmer count for MC, order is " << speciesInfoListA[IDA]->order << " ==" << endl;
-			std::string kmerFileOrder1PathNameA = speciesInfoListA[IDA]->dir + speciesInfoListA[IDA]->name + "_k" + order1strA + "_singleStrand_wordcount";
+			std::string kmerFileOrder1PathNameA = speciesInfoListA[IDA].dir + speciesInfoListA[IDA].name + "_k" + order1strA + "_singleStrand_wordcount";
 			//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
-			loadKmerCountHash(kmerFileOrder1PathNameA, speciesKmerInfoA, "kmerOrder+1");
+			loadKmerCountHash(kmerFileOrder1PathNameA, speciesKmerInfoListA[IDA], "kmerOrder+1");
 			// compute the pw
 			//cout << "== compute the pwIID for the words, for D2-type and S2 == " << endl;
-			pwIID(ZI, k, speciesKmerInfoA);
+			pwIID(ZI, k, speciesKmerInfoListA[IDA]);
 			
 		}else{
 			
 			// load the kmer count for MC: k=order
 			//cout << "== load the kmer count for MC, order is " << order << " ==" << endl;
-			std::string kmerFileOrderPathNameA = speciesInfoListA[IDA]->dir + speciesInfoListA[IDA]->name + "_k" + orderstrA + "_singleStrand_wordcount";
+			std::string kmerFileOrderPathNameA = speciesInfoListA[IDA].dir + speciesInfoListA[IDA].name + "_k" + orderstrA + "_singleStrand_wordcount";
 			//cout << "kmerFile: " << kmerFileOrderPathName << endl;
-			loadKmerCountHash(kmerFileOrderPathNameA, speciesKmerInfoA, "kmerOrder");
+			loadKmerCountHash(kmerFileOrderPathNameA, speciesKmerInfoListA[IDA], "kmerOrder");
 			
 			// load the kmer count for MC: k=order+1
 			//cout << "== load the kmer count for MC, order+1 is " << order1str << " ==" << endl;
-			std::string kmerFileOrder1PathNameA = speciesInfoListA[IDA]->dir + speciesInfoListA[IDA]->name + "_k" + order1strA + "_singleStrand_wordcount";
+			std::string kmerFileOrder1PathNameA = speciesInfoListA[IDA].dir + speciesInfoListA[IDA].name + "_k" + order1strA + "_singleStrand_wordcount";
 			//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
-			loadKmerCountHash(kmerFileOrder1PathNameA, speciesKmerInfoA, "kmerOrder+1");
+			loadKmerCountHash(kmerFileOrder1PathNameA, speciesKmerInfoListA[IDA], "kmerOrder+1");
+			
+			// compute the pw
+			
+			//cout << "== compute the pw for the words == " << endl;
+			//vector<SCIENTIFIC_NUMBER> iniProbA;
+			//iniProbA = new vector<SCIENTIFIC_NUMBER>;
+			//vector<int> AA = new vector<int>(2,0);
+			vector<SCIENTIFIC_NUMBER> *iniProbA = new vector<SCIENTIFIC_NUMBER>;
+			vector< vector<SCIENTIFIC_NUMBER> > *transMatrixA = new vector< vector<SCIENTIFIC_NUMBER> >(pow(ZI, orderA), vector<SCIENTIFIC_NUMBER>(ZI));
+			
+			//vector< vector<SCIENTIFIC_NUMBER> > transMatrixA(pow(ZI, orderA), vector<SCIENTIFIC_NUMBER>(ZI));
+			//cout << "here" << endl;
+			pwMC(ZI, k, orderA, speciesKmerInfoListA[IDA], (*iniProbA), (*transMatrixA));
+			
+			speciesKmerInfoListA[IDA]->iniProbPointer = iniProbA;
+			speciesKmerInfoListA[IDA]->transMatrixPointer = transMatrixA;
+			//cout << "A:" << TransToReal((*(speciesKmerInfoListA[IDA]->iniProbPointer))[0]) << endl;
+			
+		}
+	}
+	
+	
+	// then for each file on the second list, (the light list)
+	// compute the score between it and all the files in the first list
+	for(int IDB = 0; IDB < speciesInfoListB.size(); IDB++)
+	{
+		// this varaible "speciesKmerInfoB" will be rewritten by the next file on the list B
+		KMERINFO* speciesKmerInfoB = new KMERINFO();
+		
+		int orderB = speciesInfoListB[IDB].order;
+		char orderstrB[5];
+		sprintf(orderstrB, "%d", orderB);
+		char order1strB[5];
+		sprintf(order1strB, "%d", (orderB+1));
+		
+		cout << "======= species " << speciesInfoListB[IDB].name << " order " << orderB << endl;
+		
+		std::string kmerFilePathNameB = speciesInfoListB[IDB].dir + speciesInfoListB[IDB].name + "_k" + kstr + "_singleStrand_wordcount";
+		loadKmerCountHash(kmerFilePathNameB, speciesKmerInfoB, "kmerCount");
+		
+		if(orderB == 0)
+		{
+			// load the 1-kmer count for MC: k=order+1
+			//cout << "== load the kmer count for MC, order is " << speciesInfoListA[IDA]->order << " ==" << endl;
+			std::string kmerFileOrder1PathNameB = speciesInfoListB[IDB].dir + speciesInfoListB[IDB].name + "_k" + order1strB + "_singleStrand_wordcount";
+			//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
+			loadKmerCountHash(kmerFileOrder1PathNameB, speciesKmerInfoB, "kmerOrder+1");
+			// compute the pw
+			//cout << "== compute the pwIID for the words, for D2-type and S2 == " << endl;
+			pwIID(ZI, k, speciesKmerInfoB);
+			
+		}else{
+			
+			// load the kmer count for MC: k=order
+			//cout << "== load the kmer count for MC, order is " << order << " ==" << endl;
+			std::string kmerFileOrderPathNameB = speciesInfoListB[IDB].dir + speciesInfoListB[IDB].name + "_k" + orderstrB + "_singleStrand_wordcount";
+			//cout << "kmerFile: " << kmerFileOrderPathName << endl;
+			loadKmerCountHash(kmerFileOrderPathNameB, speciesKmerInfoB, "kmerOrder");
+			
+			// load the kmer count for MC: k=order+1
+			//cout << "== load the kmer count for MC, order+1 is " << order1str << " ==" << endl;
+			std::string kmerFileOrder1PathNameB = speciesInfoListB[IDB].dir + speciesInfoListB[IDB].name + "_k" + order1strB + "_singleStrand_wordcount";
+			//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
+			loadKmerCountHash(kmerFileOrder1PathNameB, speciesKmerInfoB, "kmerOrder+1");
 			
 			// compute the pw
 			//cout << "== compute the pw for the words == " << endl;
-			vector<SCIENTIFIC_NUMBER> iniProbA;
-			vector< vector<SCIENTIFIC_NUMBER> > transMatrixA(pow(ZI, orderA), vector<SCIENTIFIC_NUMBER>(ZI));
-			pwMC(ZI, k, orderA, speciesKmerInfoA, iniProbA, transMatrixA);
+			//vector<SCIENTIFIC_NUMBER> iniProbB;
+			//vector< vector<SCIENTIFIC_NUMBER> > transMatrixB(pow(ZI, orderB), vector<SCIENTIFIC_NUMBER>(ZI));
+			vector<SCIENTIFIC_NUMBER> *iniProbB = new vector<SCIENTIFIC_NUMBER>;
+			vector< vector<SCIENTIFIC_NUMBER> > *transMatrixB = new vector< vector<SCIENTIFIC_NUMBER> >(pow(ZI, orderB), vector<SCIENTIFIC_NUMBER>(ZI));
+			pwMC(ZI, k, orderB, speciesKmerInfoB, (*iniProbB), (*transMatrixB));
+			speciesKmerInfoB->iniProbPointer = iniProbB;
+			speciesKmerInfoB->transMatrixPointer = transMatrixB;
+			//cout << "B:" << TransToReal((*(speciesKmerInfoB->iniProbPointer))[0]) << endl;
 			
 		}
-		
-		
-		for(int IDB = IDA+1; IDB < speciesInfoListB.size(); IDB++)
-		{
-			
-			orderB <- speciesInfoListB[IDA]->order
-			char orderstrB[5];
-			sprintf(orderstrB, "%d", orderB);
-			char order1strB[5];
-			sprintf(order1strB, "%d", (orderB+1));
-			
-			cout << "======= species " << speciesInfoListB[IDB]->name << " order " << orderB << endl;
-			KMERINFO* speciesKmerInfoB = new KMERINFO();
-			std::string kmerFilePathNameA = speciesInfoListB[IDB]->dir + speciesInfoListB[IDB]->name + "_k" + kstr + "_singleStrand_wordcount";
-			loadKmerCountHash(kmerFilePathNameB, speciesKmerInfoB, "kmerCount");
-			
-			if(order == 0)
-			{
-				// load the 1-kmer count for MC: k=order+1
-				//cout << "== load the kmer count for MC, order is " << speciesInfoListA[IDA]->order << " ==" << endl;
-				std::string kmerFileOrder1PathNameB = speciesInfoListB[IDB]->dir + speciesInfoListB[IDB]->name + "_k" + order1strB + "_singleStrand_wordcount";
-				//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
-				loadKmerCountHash(kmerFileOrder1PathNameB, speciesKmerInfoB, "kmerOrder+1");
-				// compute the pw
-				//cout << "== compute the pwIID for the words, for D2-type and S2 == " << endl;
-				pwIID(ZI, k, speciesKmerInfoB);
-				
-			}else{
-				
-				// load the kmer count for MC: k=order
-				//cout << "== load the kmer count for MC, order is " << order << " ==" << endl;
-				std::string kmerFileOrderPathNameB = speciesInfoListB[IDB]->dir + speciesInfoListB[IDB]->name + "_k" + orderstrB + "_singleStrand_wordcount";
-				//cout << "kmerFile: " << kmerFileOrderPathName << endl;
-				loadKmerCountHash(kmerFileOrderPathNameB, speciesKmerInfoB, "kmerOrder");
-				
-				// load the kmer count for MC: k=order+1
-				//cout << "== load the kmer count for MC, order+1 is " << order1str << " ==" << endl;
-				std::string kmerFileOrder1PathNameB = speciesInfoListB[IDB]->dir + speciesInfoListB[IDB]->name + "_k" + order1strB + "_singleStrand_wordcount";
-				//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
-				loadKmerCountHash(kmerFileOrder1PathNameB, speciesKmerInfoB, "kmerOrder+1");
-				
-				// compute the pw
-				//cout << "== compute the pw for the words == " << endl;
-				vector<SCIENTIFIC_NUMBER> iniProbB;
-				vector< vector<SCIENTIFIC_NUMBER> > transMatrixB(pow(ZI, orderA), vector<SCIENTIFIC_NUMBER>(ZI));
-				pwMC(ZI, k, orderB, speciesKmerInfoB, iniProbB, transMatrixB);
-				
-			}
 
-			
-			
-			///////////////////////////////////////////////////////////////////////
-			////////////////////// computing the multiple statistics //////////////
-			///////////////////////////////////////////////////////////////////////
-			
-			
+		///////////////////////////////////////////////////////////////////////
+		////////////////////// computing the multiple statistics //////////////
+		///////////////////////////////////////////////////////////////////////
+		for(int IDA = 0; IDA < speciesInfoListA.size(); IDA++)
+		{
+			int orderA = speciesInfoListA[IDA].order;
+			KMERINFO* speciesKmerInfoA = speciesKmerInfoListA[IDA];
+			//cout << TransToReal((*(speciesKmerInfoA->iniProbPointer))[0]) << endl;
 			// 1. compute the D2 statistics
 			string D2StatNames[12] = {"D2", "d2", "D2star", "d2star", "D2shepp", "d2shepp", "D2NGS", "d2NGS", "D2starNGS", "d2starNGS", "D2sheppNGS", "d2sheppNGS"} ;
 			//cout << "== compute the D2 statistics, NOT consider complementary == " << endl;
@@ -1690,7 +1775,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			
 			// 2. compute the S2 statistic
 			//cout << "== compute the S2 statistics, considering single strand == " << endl;
-			double S2 = S2compute(ZI, k);
+			double S2 = S2compute(ZI, k, speciesKmerInfoA, speciesKmerInfoB);
 			//fout << "S2, " << S2 << endl;
 			cout << "S2, " << S2 << endl;
 			
@@ -1709,22 +1794,22 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 				sprintf(k_2str, "%d", k-2);
 					
 				//cout << "==== HAO: load the kmer count for (k-1) = " << k_1str << " ==" << endl;
-				std::string kmerFilek_1PathNameA = speciesInfoListA[IDA]->dir + speciesInfoListA[IDA]->name + "_k" + k_1str + "_singleStrand_wordcount";
+				std::string kmerFilek_1PathNameA = speciesInfoListA[IDA].dir + speciesInfoListA[IDA].name + "_k" + k_1str + "_singleStrand_wordcount";
 				//cout << "kmerFile: " << kmerFilek_1PathName << endl;
 				loadKmerCountHash(kmerFilek_1PathNameA, speciesKmerInfoA, "kmerCount_1");
 				// load the kmer count for MC: k=order+1
 				//cout << "==== HAO: load the kmer count for (k-2) = " << k_2str << " ==" << endl;
-				std::string kmerFilek_2PathNameA = speciesInfoListA[IDA]->dir + speciesInfoListA[IDA]->name + "_k" + k_2str + "_singleStrand_wordcount";
+				std::string kmerFilek_2PathNameA = speciesInfoListA[IDA].dir + speciesInfoListA[IDA].name + "_k" + k_2str + "_singleStrand_wordcount";
 					//cout << "kmerFile: " << kmerFilek_2PathName << endl;
 				loadKmerCountHash(kmerFilek_2PathNameA, speciesKmerInfoA, "kmerCount_2");
 
 				//cout << "==== HAO: load the kmer count for (k-1) = " << k_1str << " ==" << endl;
-				std::string kmerFilek_1PathNameB = speciesInfoListB[IDB]->dir + speciesInfoListA[IDB]->name + "_k" + k_1str + "_singleStrand_wordcount";
+				std::string kmerFilek_1PathNameB = speciesInfoListB[IDB].dir + speciesInfoListB[IDB].name + "_k" + k_1str + "_singleStrand_wordcount";
 				//cout << "kmerFile: " << kmerFilek_1PathName << endl;
 				loadKmerCountHash(kmerFilek_1PathNameB, speciesKmerInfoB, "kmerCount_1");
 				// load the kmer count for MC: k=order+1
 				//cout << "==== HAO: load the kmer count for (k-2) = " << k_2str << " ==" << endl;
-				std::string kmerFilek_2PathNameB = speciesInfoListB[IDB]->dir + speciesInfoListA[IDB]->name + "_k" + k_2str + "_singleStrand_wordcount";
+				std::string kmerFilek_2PathNameB = speciesInfoListB[IDB].dir + speciesInfoListB[IDB].name + "_k" + k_2str + "_singleStrand_wordcount";
 				//cout << "kmerFile: " << kmerFilek_2PathName << endl;
 				loadKmerCountHash(kmerFilek_2PathNameB, speciesKmerInfoB, "kmerCount_2");
 			
@@ -1747,12 +1832,12 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			double JSdivergence;
 			double JSdistance;
 			
-			if(order[0] != order[1])
+			if( orderA != orderB )
 			{
 				//cout << "ERROR: order 1 MUST equal order 2." << endl;
 			}else{
     
-				if(order[0] == 0){
+				if(orderA == 0){
 				
 				vector<SCIENTIFIC_NUMBER> iidProb1;
 				vector<SCIENTIFIC_NUMBER> iidProb2;
@@ -1774,23 +1859,28 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 				}else{
 				
 					// order1 MUST equal order2
-					entropyRate1 = JScomputeMC(iniProbA, transMatrixA);
-					entropyRate2 = JScomputeMC(iniProbB, transMatrixB);
+					//entropyRate1 = JScomputeMC(speciesKmerInfoA->iniProbPointer, speciesKmerInfoA->transMatrixPointer);
+					//entropyRate2 = JScomputeMC(speciesKmerInfoB->iniProbPointer, speciesKmerInfoB->transMatrixPointer);
+					entropyRate1 = JScomputeMC( (*(speciesKmerInfoA->iniProbPointer)), (*(speciesKmerInfoA->transMatrixPointer)) );
+					entropyRate2 = JScomputeMC( (*(speciesKmerInfoB->iniProbPointer)), (*(speciesKmerInfoB->transMatrixPointer)) );
+					//cout << TransToReal((*(speciesKmerInfoA->iniProbPointer))[0]) << endl;
+
+					
 					
 					vector<SCIENTIFIC_NUMBER> iniProbAve;
-					for(int currentIndex = 0; currentIndex < pow(ZI, order[0]); currentIndex++)
+					for(int currentIndex = 0; currentIndex < pow(ZI, orderA); currentIndex++)
 					{
-						iniProbAve.push_back(SciMultiple(SciAddition(iniProbA[currentIndex], iniProbB[currentIndex]), 0.5));
+						iniProbAve.push_back(SciMultiple(SciAddition((*(speciesKmerInfoA->iniProbPointer))[currentIndex], (*(speciesKmerInfoB->iniProbPointer))[currentIndex]), 0.5));
 						//cout << TransToReal(iniProbAve[currentIndex]) << endl;
 					}
 					
-					vector< vector<SCIENTIFIC_NUMBER> > transMatrixAve(pow(ZI,order[0]), vector<SCIENTIFIC_NUMBER>(ZI));
-					for(int currentRow = 0; currentRow < pow(ZI, order[0]); currentRow++)
+					vector< vector<SCIENTIFIC_NUMBER> > transMatrixAve(pow(ZI,orderA), vector<SCIENTIFIC_NUMBER>(ZI));
+					for(int currentRow = 0; currentRow < pow(ZI, orderA); currentRow++)
 					{
 						for(int currentCol = 0; currentCol < ZI; currentCol++)
 						{
 							// compute JS distance
-							transMatrixAve[currentRow][currentCol] = SciMultiple(SciAddition(transMatrixA[currentRow][currentCol], transMatrixB[currentRow][currentCol]), 0.5);
+							transMatrixAve[currentRow][currentCol] = SciMultiple(SciAddition((*(speciesKmerInfoA->transMatrixPointer))[currentRow][currentCol], (*(speciesKmerInfoB->transMatrixPointer))[currentRow][currentCol]), 0.5);
 							
 						}
 					}
@@ -1834,21 +1924,13 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 				cout << "ERROR: no definition of Willner for k>4." << endl;
     
 			}else{
-				double willner = WillnerDiNGS(ZI, k) ;
+				double willner = WillnerDiNGS(ZI, k, speciesKmerInfoA, speciesKmerInfoB) ;
 				cout << "willner, " << willner << endl ;
 				//fout << "willner, " << willner << endl ;
 			}
 			
 			
-			
-			
-			
-			
-			
-			
-			
 		}
-
 		
 		
 	}

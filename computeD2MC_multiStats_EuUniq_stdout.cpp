@@ -1699,7 +1699,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
     sprintf(k_1str, "%d", k-1);
     char k_2str[5];
     sprintf(k_2str, "%d", k-2); 
-
+		// 20150629, totalK_1/totalK_2 are not the same as totalOrder/totalOrder_1!!!
     for(int speciesID=0; speciesID<2; speciesID++)
     {
       //cout << "==== HAO: load the kmer count for (k-1) = " << k_1str << " ==" << endl;

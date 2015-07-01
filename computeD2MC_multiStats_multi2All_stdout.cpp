@@ -1308,7 +1308,6 @@ double WillnerDiNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* species
 
 
 
-
 /// need to write it as complimentary chains
 double HAOcompute(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
 {
@@ -1396,6 +1395,95 @@ double HAOcompute(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKm
 }
 
 
+
+// not consider complimentary chains
+// the version of Teeling on complimentary chains is not exactly right
+/// need to write it as complimentary chains
+double TeelingCompute(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* speciesKmerInfoB)
+{
+	SCIENTIFIC_NUMBER Teeling_above;
+	Teeling_above.value = 0; Teeling_above.factor = 0;
+	SCIENTIFIC_NUMBER Teeling_below[2];
+	Teeling_below[0].value = 0; Teeling_below[0].factor = 0;
+	Teeling_below[1].value = 0; Teeling_below[1].factor = 0;
+	for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++ )
+	{
+		//vector<int> four (k, 0);
+		vector<int> currentKmerFour = ten2four(currentKmerTen, k);
+		//cout << endl << endl;
+		//printFour(currentKmerFour);
+		vector<int> currentKmerRemoveLastFour;
+		vector<int> currentKmerRemoveFirstFour;
+		vector<int> currentKmerRemoveTwoFour;
+		for(int position = 0; position < k; position++)
+		{
+			if( position != k)
+			{
+				currentKmerRemoveLastFour.push_back(currentKmerFour[position]);
+			}
+			if( position != 0)
+			{
+				currentKmerRemoveFirstFour.push_back(currentKmerFour[position]);
+			}
+			if( position != 0 && position != k)
+			{
+				currentKmerRemoveTwoFour.push_back(currentKmerFour[position]);
+			}
+		}
+		unsigned long currentKmerRemoveLastTen = four2ten(currentKmerRemoveLastFour, (k-1));
+		unsigned long currentKmerRemoveFirstTen = four2ten(currentKmerRemoveFirstFour, (k-1));
+		unsigned long currentKmerRemoveTwoTen = four2ten(currentKmerRemoveTwoFour, (k-2));
+		
+		SCIENTIFIC_NUMBER Zvalue[2];
+		Zvalue[0].value = 0; Zvalue[0].factor = 0;
+		Zvalue[1].value = 0; Zvalue[1].factor = 0;
+		for(int speciesID=0; speciesID<2; speciesID++)
+		{
+			KMERINFO* speciesKmerInfo;
+			if (speciesID == 0)
+				speciesKmerInfo = speciesKmerInfoA;
+			else
+				speciesKmerInfo = speciesKmerInfoB;
+			
+			SCIENTIFIC_NUMBER Ew; Ew.value = 0; Ew.factor = 0;
+			SCIENTIFIC_NUMBER Vw; Vw.value = 0; Vw.factor = 0;
+			if(speciesKmerInfo->HashTableK_2[currentKmerRemoveTwoTen] != 0)
+			{
+				//cout << "HashTableK_1 " << "species " << speciesID << " word " << currentKmerRemoveLastTen << " kmercount " << speciesKmerInfo->HashTableK_1[currentKmerRemoveLastTen] << " totalK_1 " << speciesKmerInfo->totalK_1 << "; " << speciesKmerInfo->HashTableK_1[currentKmerRemoveFirstTen] << " totalK_1 " << speciesKmerInfo->totalK_1 << "; " << speciesKmerInfo->HashTableK_2[currentKmerRemoveTwoTen] << " totalK_2 " << speciesKmerInfo->totalK_2 << endl;
+				SCIENTIFIC_NUMBER Ew_up1 = TransToScientific(speciesKmerInfo->HashTableK_1[currentKmerRemoveLastTen]);
+				SCIENTIFIC_NUMBER Ew_up2 = TransToScientific(speciesKmerInfo->HashTableK_1[currentKmerRemoveFirstTen]);
+				SCIENTIFIC_NUMBER Ew_down = TransToScientific(speciesKmerInfo->HashTableK_2[currentKmerRemoveTwoTen]);
+				
+				Ew = SciMultiple(SciMultiple(Ew_up1, Ew_up2),SciInverse(Ew_down));
+				//cout << HashTableK_1[speciesID][currentKmerRemoveLastTen]/totalK_1[speciesID] << " " << TransToReal(pw0_up1) << " " << TransToReal(pw0_up2) << " " << TransToReal(pw0_down) << " " << TransToReal(pw0) << endl;
+				//fw0 = totalKmer[speciesID] * pw0;
+				SCIENTIFIC_NUMBER one; one.value = 1; one.factor = 0;
+				SCIENTIFIC_NUMBER Vw_1 = SciAddition(one, SciNegative(SciMultiple(Ew_up1, SciInverse(Ew_down))) );
+				SCIENTIFIC_NUMBER Vw_2 = SciAddition(one, SciNegative(SciMultiple(Ew_up2, SciInverse(Ew_down))) );
+				Vw = SciMultiple( SciMultiple(Ew, Vw_1), Vw_2 );
+			}
+			
+			SCIENTIFIC_NUMBER Nw = TransToScientific(speciesKmerInfo->HashTable[currentKmerTen]);
+			//cout << "Nw " << TransToReal(Nw) << " Ew " << TransToReal(Ew) << " Vw " << TransToReal(SciPow(Vw, 0.5)) << endl;
+			if(Vw.value != 0)
+			{
+				Zvalue[speciesID] = SciMultiple(SciAddition(Nw, SciNegative(Ew)), SciInverse(SciPow(Vw, 0.5)) );
+			}
+			//cout << TransToReal(pw) << " " << TransToReal(pw0) << endl;
+			//cout << TransToReal(avalue[speciesID]) << endl;
+			Teeling_below[speciesID] = SciAddition(Teeling_below[speciesID], SciPow(Zvalue[speciesID],2));
+		}
+		
+		Teeling_above = SciAddition(Teeling_above, SciMultiple(Zvalue[0], Zvalue[1]));
+		
+	}
+	//cout << TransToReal(HAO_above) << " " << TransToReal(HAO_below[0]) << " " << TransToReal(HAO_below[1]) << endl;
+	
+	SCIENTIFIC_NUMBER TeelingValueSCI = SciMultiple(Teeling_above, SciInverse(SciPow(SciMultiple(Teeling_below[0], Teeling_below[1]) , 0.5)));
+	double TeelingValue = TransToReal(TeelingValueSCI);
+	
+	return TeelingValue;
+}
 
 
 
@@ -1618,6 +1706,15 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 		
 	}
 
+	// 3.5 compute Teeling similarity
+	//cout << "== compute the HAO distance, considering single strand == " << endl;
+	if(k < 3){
+		//cerr << "ERROR: There is no Teeling distance for k < 3!" << endl;
+		
+	}else{
+		double TeelingValue = TeelingCompute(ZI, k, speciesKmerInfoA, speciesKmerInfoB);
+		cout << "teeling, " << TeelingValue << endl;
+	}
 
 	
 	// 4. compute JS distance
@@ -2056,6 +2153,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			
 			cout << "speciesA:" << IDA << endl;
 			cout << "speciesB:" << IDB << endl;
+			cerr << "speciesA:" << IDA << ", speciesB:" << IDB << endl;
 			
 			computeMultiStats(ZI, k, speciesKmerInfoA, speciesKmerInfoB, speciesInfoA, speciesInfoB);
 		

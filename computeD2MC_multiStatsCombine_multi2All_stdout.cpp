@@ -1537,7 +1537,7 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 	//}
 
 
-	cout << "== compute the D2 statistics, consider complementary == " << endl;
+	//cout << "== compute the D2 statistics, consider complementary == " << endl;
 	vector<double> D2C2NGSvalues = D2C2computeNGS(ZI, k, speciesKmerInfoA, speciesKmerInfoB);
 	//printFour(D2C2values);
 
@@ -1559,7 +1559,7 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 
 
 	// 3. compute HAO distance
-	cout << "== compute the HAO and Teeling statistic, considering single strand == " << endl;
+	//cout << "== compute the HAO and Teeling statistic, considering single strand == " << endl;
 	if(k < 3){
 		//cerr << "ERROR: There is no Hao distance for k < 3!" << endl;
 		
@@ -1607,7 +1607,7 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 
 	
 	// 4. compute JS distance
-	cout << "== compute the JSdistance == " << endl;
+	//cout << "== compute the JSdistance == " << endl;
 	double entropyRate1;
 	double entropyRate2;
 	double entropyRateAve;
@@ -1685,7 +1685,7 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 
 
 	// 5. compute Eu, Ma, Ch
-	cout << "== compute the EuMaCh distances == " << endl;
+	//cout << "== compute the EuMaCh distances == " << endl;
 	vector<double> EuMaChCombineDistvalues = EuMaChCombineDistNGS(ZI, k, speciesKmerInfoA, speciesKmerInfoB) ;
 	cout << "Eu, " << EuMaChCombineDistvalues[0] << endl ;
 	cout << "Ma, " << EuMaChCombineDistvalues[1] << endl ;
@@ -1699,10 +1699,10 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 	//fout << "EuF, " << EuFDistvalues[0] << endl;
 
 	// 7. compute Willner
-	cout << "== compute the Willner distance == " << endl;
+	//cout << "== compute the Willner distance == " << endl;
 	if( k > 4)
 	{
-		cout << "ERROR: no definition of Willner for k>4." << endl;
+		//cout << "ERROR: no definition of Willner for k>4." << endl;
 		
 	}else{
 		double willner = WillnerDiNGS(ZI, k, speciesKmerInfoA, speciesKmerInfoB) ;
@@ -1853,7 +1853,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		speciesKmerInfoListA[IDA] = new KMERINFO();
 	}
 	
-	cout << "=== start loading kmers & computing Pw in all species in ListA === " << endl;
+	//cout << "=== start loading kmers & computing Pw in all species in ListA === " << endl;
 	for(int IDA = 0; IDA < speciesInfoListA.size(); IDA++)
 	{
 		SPECIESINFO speciesInfoA = speciesInfoListA[IDA];
@@ -1942,7 +1942,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 	// compute the score between it and all the files in the first list
 	for(int IDB = 0; IDB < speciesInfoListB.size(); IDB++)
 	{
-		cout << "=== start loading kmers & computePw in one of ListB === " << endl;
+		//cout << "=== start loading kmers & computePw in one of ListB === " << endl;
 		
 		// this varaible "speciesKmerInfoB" will be rewritten by the next file on the list B
 		KMERINFO* speciesKmerInfoB = new KMERINFO();
@@ -2033,7 +2033,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			KMERINFO* speciesKmerInfoA = speciesKmerInfoListA[IDA];
 			SPECIESINFO speciesInfoA = speciesInfoListA[IDA];
 			
-			cout << "=== start computing statistics === " << endl;
+			//cout << "=== start computing statistics === " << endl;
 			cout << "speciesA:" << IDA << endl;
 			cout << "speciesB:" << IDB << endl;
 			cerr << "speciesA:" << IDA << ", speciesB:" << IDB << endl;

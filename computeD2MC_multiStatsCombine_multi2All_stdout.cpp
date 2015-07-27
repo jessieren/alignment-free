@@ -76,6 +76,8 @@ struct KMERINFO
 	unsigned long totalOrder;
 	unsigned long totalOrder_1;
 	
+	vector<SCIENTIFIC_NUMBER> *probIIDPointer;
+	
 	vector< vector<SCIENTIFIC_NUMBER> > *transMatrixPointer;
 	vector<SCIENTIFIC_NUMBER> *iniProbPointer;
 };
@@ -559,15 +561,16 @@ vector<int> reverseFour(vector<int> Four)
   
 
 
-void pwIID(int ZI, int k, KMERINFO* speciesKmerInfo)
+void pwIID(int ZI, int k, KMERINFO* speciesKmerInfo, vector<SCIENTIFIC_NUMBER>& probIID )
 {
   // compute pw for each kmer word
-  unordered_map<unsigned long,SCIENTIFIC_NUMBER > probIID;
+  //unordered_map<unsigned long,SCIENTIFIC_NUMBER > probIID;
   //cout << HashTableOrder_1[speciesID][0]/double(totalOrder_1[speciesID]) << endl;
   for(int index = 0; index < ZI; index++)
   { 
     //cout << HashTableOrder_1[speciesID][index] << endl;
-    probIID[index] = TransToScientific(speciesKmerInfo->HashTableOrder_1[index]/double(speciesKmerInfo->totalOrder_1));
+    //probIID[index] = TransToScientific(speciesKmerInfo->HashTableOrder_1[index]/double(speciesKmerInfo->totalOrder_1));
+		probIID.push_back( TransToScientific(speciesKmerInfo->HashTableOrder_1[index]/double(speciesKmerInfo->totalOrder_1)) );
   }
   
   for(unsigned long ten = 0; ten < pow(ZI, k); ten++ )
@@ -1627,14 +1630,14 @@ void computeMultiStats(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* spec
 			vector<SCIENTIFIC_NUMBER> iidProbAve;
 			for(int currentIndex = 0; currentIndex < ZI; currentIndex++)
 			{
-				iidProb1.push_back(speciesKmerInfoA->HashPw[currentIndex]);
-				iidProb2.push_back(speciesKmerInfoB->HashPw[currentIndex]);
-				iidProbAve.push_back(SciMultiple(SciAddition(speciesKmerInfoA->HashPw[currentIndex], speciesKmerInfoB->HashPw[currentIndex]), 0.5));
+				//iidProb1.push_back(speciesKmerInfoA->HashPw[currentIndex]);
+				//iidProb2.push_back(speciesKmerInfoB->HashPw[currentIndex]);
+				iidProbAve.push_back(SciMultiple(SciAddition( (*(speciesKmerInfoA->probIIDPointer))[currentIndex], (*(speciesKmerInfoB->probIIDPointer))[currentIndex] ), 0.5));
 			}
 			
-			entropyRate1 = JScomputeIID(iidProb1);
-			entropyRate2 = JScomputeIID(iidProb2);
-			entropyRateAve = JScomputeIID(iidProbAve);
+			entropyRate1 = JScomputeIID( (*(speciesKmerInfoA->probIIDPointer)) );
+			entropyRate2 = JScomputeIID( (*(speciesKmerInfoB->probIIDPointer)) );
+			entropyRateAve = JScomputeIID( iidProbAve );
 			JSdivergence = entropyRateAve - 0.5 * entropyRate1 - 0.5 * entropyRate2;
 			JSdistance = pow(JSdivergence, 0.5);
 			
@@ -1898,8 +1901,12 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			loadKmerCountHash(kmerFileOrder1PathNameA, speciesKmerInfoListA[IDA], "kmerOrder+1");
 			// compute the pw
 			//cout << "== compute the pwIID for the words, for D2-type and S2 == " << endl;
-			pwIID(ZI, k, speciesKmerInfoListA[IDA]);
+			//20150727 JS IID correct
+			vector<SCIENTIFIC_NUMBER> *probIIDA = new vector<SCIENTIFIC_NUMBER>;
+			pwIID(ZI, k, speciesKmerInfoListA[IDA], (*probIIDA));
 			
+			speciesKmerInfoListA[IDA]->probIIDPointer = probIIDA;
+
 		}else{
 			
 			// load the kmer count for MC: k=order
@@ -1979,6 +1986,9 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		char order1strB[5];
 		sprintf(order1strB, "%d", (orderB+1));
 		
+		vector<SCIENTIFIC_NUMBER> *probIIDB = new vector<SCIENTIFIC_NUMBER>;
+		vector<SCIENTIFIC_NUMBER> *iniProbB = new vector<SCIENTIFIC_NUMBER>;
+		vector< vector<SCIENTIFIC_NUMBER> > *transMatrixB = new vector< vector<SCIENTIFIC_NUMBER> >(pow(ZI, orderB), vector<SCIENTIFIC_NUMBER>(ZI));
 		if(orderB == 0)
 		{
 			// load the 1-kmer count for MC: k=order+1
@@ -1988,7 +1998,12 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			loadKmerCountHash(kmerFileOrder1PathNameB, speciesKmerInfoB, "kmerOrder+1");
 			// compute the pw
 			//cout << "== compute the pwIID for the words, for D2-type and S2 == " << endl;
-			pwIID(ZI, k, speciesKmerInfoB);
+			
+			//20150727 JS IID correct
+			//vector<SCIENTIFIC_NUMBER> *probIIDB = new vector<SCIENTIFIC_NUMBER>;
+			pwIID(ZI, k, speciesKmerInfoB, (*probIIDB));
+			speciesKmerInfoB->probIIDPointer = probIIDB;
+
 			
 		}else{
 			
@@ -2012,8 +2027,8 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			//cout << "== compute the pw for the words == " << endl;
 			//vector<SCIENTIFIC_NUMBER> iniProbB;
 			//vector< vector<SCIENTIFIC_NUMBER> > transMatrixB(pow(ZI, orderB), vector<SCIENTIFIC_NUMBER>(ZI));
-			vector<SCIENTIFIC_NUMBER> *iniProbB = new vector<SCIENTIFIC_NUMBER>;
-			vector< vector<SCIENTIFIC_NUMBER> > *transMatrixB = new vector< vector<SCIENTIFIC_NUMBER> >(pow(ZI, orderB), vector<SCIENTIFIC_NUMBER>(ZI));
+			//vector<SCIENTIFIC_NUMBER> *iniProbB = new vector<SCIENTIFIC_NUMBER>;
+			//vector< vector<SCIENTIFIC_NUMBER> > *transMatrixB = new vector< vector<SCIENTIFIC_NUMBER> >(pow(ZI, orderB), vector<SCIENTIFIC_NUMBER>(ZI));
 			pwMC(ZI, k, orderB, speciesKmerInfoB, (*iniProbB), (*transMatrixB));
 			speciesKmerInfoB->iniProbPointer = iniProbB;
 			speciesKmerInfoB->transMatrixPointer = transMatrixB;
@@ -2039,10 +2054,15 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			cerr << "speciesA:" << IDA << ", speciesB:" << IDB << endl;
 			
 			computeMultiStats(ZI, k, speciesKmerInfoA, speciesKmerInfoB, speciesInfoA, speciesInfoB);
+			
+			//delete speciesKmerInfoA;
 		
 		}
 		
 		delete speciesKmerInfoB;
+		delete probIIDB;
+		delete iniProbB;
+		delete transMatrixB;
 	}
 
 	

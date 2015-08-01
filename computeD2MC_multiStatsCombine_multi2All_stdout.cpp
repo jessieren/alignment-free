@@ -1129,8 +1129,17 @@ double WillnerDiNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* species
       }
       //cout << fOneLetters1[0] << "," << fOneLetters1[1] << "," << fOneLetters1[2] << endl; 
       //cout << fOneLetters1[0] << "," << fOneLetters1[1] << "," << fOneLetters1[2] << endl;
-      double gamma1 = fabc1 * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] / ( fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] ) ;
-      double gamma2 = fabc2 * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] / ( fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] ) ;
+			double gamma1 = 0;
+			double gamma2 = 0;
+			if( fTwoLetters1[0] != 0 && fTwoLetters1[1] != 0 && fTwoLetters1[2] != 0 )
+			{
+				gamma1 = fabc1 * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] / ( fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] ) ;
+			}
+			
+			if( fTwoLetters2[0] != 0 && fTwoLetters2[1] != 0 && fTwoLetters2[2] != 0 )
+			{
+				gamma2 = fabc2 * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] / ( fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] ) ;
+			}
       gammaTri = gammaTri + fabs( gamma1 - gamma2) ;
       //cout << gamma1 << ","  << gamma2 << endl;
       //cout << fabs(gamma1-gamma2) << ".." << gammaTri << endl;
@@ -1237,9 +1246,17 @@ double WillnerDiNGS(int ZI, int k, KMERINFO* speciesKmerInfoA, KMERINFO* species
       //cout << fOneLetters1[1] << endl;
       //cout << fTwoLetters1[1] << endl;
       //cout << fThreeLetters1[1] << endl;
-      double tau1 = fabcd1 * fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] * fTwoLetters1[3] * fTwoLetters1[4] * fTwoLetters1[5] / ( fThreeLetters1[0] * fThreeLetters1[1] * fThreeLetters1[2] * fThreeLetters1[3] * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] * fOneLetters1[3]) ;
-      
-      double tau2 = fabcd2 * fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] * fTwoLetters2[3] * fTwoLetters2[4] * fTwoLetters2[5] / ( fThreeLetters2[0] * fThreeLetters2[1] * fThreeLetters2[2] * fThreeLetters2[3] * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] * fOneLetters2[3]) ;
+			double tau1 = 0;
+			double tau2 = 0;
+			if( fThreeLetters1[0] != 0 && fThreeLetters1[1] != 0 && fThreeLetters1[2] != 0 && fThreeLetters1[3] != 0 )
+			{
+				tau1 = fabcd1 * fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] * fTwoLetters1[3] * fTwoLetters1[4] * fTwoLetters1[5] / ( fThreeLetters1[0] * fThreeLetters1[1] * fThreeLetters1[2] * fThreeLetters1[3] * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] * fOneLetters1[3]) ;
+			}
+			
+			if( fThreeLetters2[0] != 0 && fThreeLetters2[1] != 0 && fThreeLetters2[2] != 0 && fThreeLetters2[3] != 0 )
+			{
+				tau2 = fabcd2 * fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] * fTwoLetters2[3] * fTwoLetters2[4] * fTwoLetters2[5] / ( fThreeLetters2[0] * fThreeLetters2[1] * fThreeLetters2[2] * fThreeLetters2[3] * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] * fOneLetters2[3]) ;
+			}
       
       //cout << "tau1," << tau1 << endl;
       

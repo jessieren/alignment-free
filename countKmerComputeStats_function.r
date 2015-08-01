@@ -22,7 +22,7 @@ countKmerComputeStats <- function(phageFileName, phageNCBIName, hostFileName, ho
 	{
 		if( !file.exists( file.path(hostKmerCountPath, paste(hostNCBIName, "_k", k, "_singleStrand_wordcount", sep="") ) ) )
 		{
-			countKmerCommand <- paste(countKmerCodePath, " -l -k ", k, " -i ", hostFileName, " -s ", hostNCBIName, " -o ", hostKmerCountPath, sep=""))
+			countKmerCommand <- paste(countKmerCodePath, " -l -k ", k, " -i ", hostFileName, " -s ", hostNCBIName, " -o ", hostKmerCountPath, sep="")
 			print("===== count kmer host ======")
 			#print(countKmerCommand)
 			system(countKmerCommand, ignore.stdout = TRUE, ignore.stderr = TRUE)
@@ -34,9 +34,9 @@ countKmerComputeStats <- function(phageFileName, phageNCBIName, hostFileName, ho
 	## compute dissimilarity measures ##
 	## d2, N2 is similarity
 	## phage - host
-
+	
 	print("===== compute multiStats ======")
-	computeSimilarityCommand <- paste(computeD2MCCodePath, "-a ", phageNCBIName, " -b ", order, " -c ", hostNCBIName, " -d ", order, " -k ", w, " -i ", phageKmerCountPath, " -j ", hostKmerCountPath, sep=""))
+	computeSimilarityCommand <- paste(computeD2MCCodePath, " -a ", phageNCBIName, " -b ", order, " -c ", hostNCBIName, " -d ", order, " -k ", w, " -i ", phageKmerCountPath, " -j ", hostKmerCountPath, sep="")
 	print(computeSimilarityCommand)
 	stdout <- system(computeSimilarityCommand, intern = TRUE)
 	statScores <- rep(NA, length(multiStatsNames))
@@ -51,7 +51,7 @@ countKmerComputeStats <- function(phageFileName, phageNCBIName, hostFileName, ho
 		}
 	}
 	as.matrix(statScores)
-
+	
 	
 }
 
@@ -101,7 +101,7 @@ computeStatsMulti2All <- function(NCBINameListA, NCBINameListB, kmerCountPath, w
 	#print(computeSimilarityCommand)
 	#system(computeSimilarityCommand, ignore.stdout = TRUE, ignore.stderr = TRUE)
 	#stdout <- system(computeSimilarityCommand, intern = TRUE, ignore.stdout = FALSE)
-	cprogram <- file.path(computeD2MCCodePath, "computeD2MC_multiStatsCombine_multi2All_stdout.out")
+	cprogram <- computeD2MCCodePath
 	computeSimilarityCommand <- paste(" -k ", w, " -i ", listFilePathA, " -j ", listFilePathB, sep="")
 	stdout <- system2(cprogram, computeSimilarityCommand, stdout=TRUE)
 	statScores <- array(NA, dim=c(length(NCBINameListA), length(NCBINameListB), length(multiStatsNames)), dimnames=list(NCBINameListA, NCBINameListB, multiStatsNames) )
@@ -131,7 +131,6 @@ computeStatsMulti2All <- function(NCBINameListA, NCBINameListB, kmerCountPath, w
 
 
 
-
 ## To use, for example,
 
 
@@ -143,8 +142,8 @@ setwd("/panfs/cmb-panasas2/renj/NCBI_phage_host/results")
 hostFilePath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/host"
 phageFilePath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/phage"
 kmerCountPath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/kmerCount"
-countKmerCodePath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/code"
-computeD2MCCodePath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/code"
+countKmerCodePath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/code/countKmer.out"
+computeD2MCCodePath <- "/panfs/cmb-panasas2/renj/NCBI_phage_host/code/computeD2MC_multiStats_stdout.out"
 
 
 multiStatsCandi <- c("D2", "d2", "D2star", "d2star", "D2shepp", "d2shepp", "D2NGS", "d2NGS", "D2starNGS", "d2starNGS", "D2sheppNGS", "d2sheppNGS", "S2", "hao", "JS", "Eu", "Ma", "Ch", "EuF", "willner")

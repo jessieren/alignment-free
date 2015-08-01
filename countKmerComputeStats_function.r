@@ -8,7 +8,7 @@ countKmerComputeStats <- function(phageFileName, phageNCBIName, hostFileName, ho
 		
 		if( !file.exists( file.path(phageKmerCountPath, paste(phageNCBIName, "_k", k, "_singleStrand_wordcount", sep="") ) ) )
 		{
-			countKmerCommand <- file.path(countKmerCodePath, paste("countKmer.out -l -k ", k, " -i ", phageFileName, " -s ", phageNCBIName, " -o ", phageKmerCountPath, sep=""))
+			countKmerCommand <- paste(countKmerCodePath, " -l -k ", k, " -i ", phageFileName, " -s ", phageNCBIName, " -o ", phageKmerCountPath, sep="")
 			print("===== count kmer phage ======")
 			#print(countKmerCommand)
 			system(countKmerCommand, ignore.stdout = TRUE, ignore.stderr = TRUE)
@@ -22,7 +22,7 @@ countKmerComputeStats <- function(phageFileName, phageNCBIName, hostFileName, ho
 	{
 		if( !file.exists( file.path(hostKmerCountPath, paste(hostNCBIName, "_k", k, "_singleStrand_wordcount", sep="") ) ) )
 		{
-			countKmerCommand <- file.path(computeD2MCCodePath, paste("countKmer.out -l -k ", k, " -i ", hostFileName, " -s ", hostNCBIName, " -o ", hostKmerCountPath, sep=""))
+			countKmerCommand <- paste(countKmerCodePath, " -l -k ", k, " -i ", hostFileName, " -s ", hostNCBIName, " -o ", hostKmerCountPath, sep=""))
 			print("===== count kmer host ======")
 			#print(countKmerCommand)
 			system(countKmerCommand, ignore.stdout = TRUE, ignore.stderr = TRUE)
@@ -36,7 +36,7 @@ countKmerComputeStats <- function(phageFileName, phageNCBIName, hostFileName, ho
 	## phage - host
 
 	print("===== compute multiStats ======")
-	computeSimilarityCommand <- file.path(computeD2MCCodePath, paste("computeD2MC_multiStats_stdout.out -a ", phageNCBIName, " -b ", order, " -c ", hostNCBIName, " -d ", order, " -k ", w, " -i ", phageKmerCountPath, " -j ", hostKmerCountPath, sep=""))
+	computeSimilarityCommand <- paste(computeD2MCCodePath, "-a ", phageNCBIName, " -b ", order, " -c ", hostNCBIName, " -d ", order, " -k ", w, " -i ", phageKmerCountPath, " -j ", hostKmerCountPath, sep=""))
 	print(computeSimilarityCommand)
 	stdout <- system(computeSimilarityCommand, intern = TRUE)
 	statScores <- rep(NA, length(multiStatsNames))

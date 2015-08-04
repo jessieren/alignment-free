@@ -22,7 +22,7 @@ To use the program,
 
 > g++ countKmer.cpp -o countKmer.out
 
-> ./countKmer.out -k k-tupleLength -i input fasta/fastqFilePathName -s shortName -o outputDirectory -q fastq? -z outputZeroCountWords? -d countForDoubleStrands? -l inputFileRefSeq? -p inputFileNoAnnotation?
+> ./countKmer.out -k k-tupleLength -i input fasta/fastqFilePathName -s shortName -o outputDirectory -q fastq? -z outputZeroCountWords? -d countForDoubleStrands? -l inputFileRefSeq? -p inputFileNoAnnotation(no need preprocess)?
 
 
 The second step is to compute multiple alignment-free sequence comparison meausres. The corresponding program is "computeD2MC_multiStat.cpp".

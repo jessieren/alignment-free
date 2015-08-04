@@ -954,231 +954,251 @@ vector<double> modifiedEuDistNGS(int ZI, int k)
 
 
 
+
 // Willner et al. Di, Tri, Tetra
 double WillnerDiNGS(int ZI, int k)
 {
-  
-  double deltaDi = 0;
-  //cout << "test" << ", k" << k << endl;
-
-  // Di
-  if( k == 2 )
-  {
-
-    for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
-    {
-      //cout << "test" << endl;
-      vector<int> currentKmerFour = ten2four(currentKmerTen, k);
-      vector<int> currentKmerRevFour = reverseFour(currentKmerFour);
-      unsigned long currentKmerRevTen = four2ten(currentKmerRevFour, currentKmerFour.size());
-      
-  //    cout << "test" << endl;
-      
-      // frequency
-      double fab1 = ( HashTable[0][currentKmerTen] + HashTable[0][currentKmerRevTen] ) / double( 2 * totalKmer[0] );
-      double fab2 = ( HashTable[1][currentKmerTen] + HashTable[1][currentKmerRevTen] ) / double( 2 * totalKmer[1] );
-      
-      //cout << "fab1" << fab1 << endl;
-      
-      double fa1 = ( HashTableOrder_1[0][currentKmerFour[0]] + HashTableOrder_1[0][3-currentKmerFour[0]] ) / double( 2 * totalOrder_1[0] );
-      double fb1 = ( HashTableOrder_1[0][currentKmerFour[1]] + HashTableOrder_1[0][3-currentKmerFour[1]] ) / double( 2 * totalOrder_1[0] );
-      
-      double fa2 = ( HashTableOrder_1[1][currentKmerFour[0]] + HashTableOrder_1[1][3-currentKmerFour[0]] ) / double( 2 * totalOrder_1[1] );
-      double fb2 = ( HashTableOrder_1[1][currentKmerFour[1]] + HashTableOrder_1[1][3-currentKmerFour[1]] ) / double( 2 * totalOrder_1[1] );
-      
-      deltaDi = deltaDi + fabs( fab1 / ( fa1 * fb1) - fab2 / ( fa2 * fb2) );
-      
-    } 
-    return deltaDi;
-  }
-  
-  double gammaTri = 0;
-  if( k == 3 )
-  { 
-    for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
-    {
-      vector<int> currentKmerFour = ten2four(currentKmerTen, k);
-      vector<int> currentKmerRevFour = reverseFour(currentKmerFour);
-      unsigned long currentKmerRevTen = four2ten(currentKmerRevFour, currentKmerFour.size());
-      
-      // frequency
-      double fabc1 = ( HashTable[0][currentKmerTen] + HashTable[0][currentKmerRevTen] ) / double( 2 * totalKmer[0] ) ;
-      double fabc2 = ( HashTable[1][currentKmerTen] + HashTable[1][currentKmerRevTen] ) / double( 2 * totalKmer[1] ) ;
-      
-      vector<double> fTwoLetters1; // 3 in total
-      vector<double> fTwoLetters2; // 3 in total
-      for( int missPos = 0; missPos < 4; missPos++)
-      {
-        double wordFreq1=0;
-        double wordFreq2=0;
-        for( int missLetter = 0; missLetter < 4; missLetter++)
-        {
-          vector<int> currentWordFour = currentKmerFour;
-          currentWordFour[missPos] = missLetter;
-          unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
-          unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
-          wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
-          wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
-        }
-        fTwoLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
-        fTwoLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
-
-      }
-      
-      vector<double> fOneLetters1; // 3 in total
-      vector<double> fOneLetters2; // 3 in total
-      for( int missPosFirst = 0; missPosFirst < 4; missPosFirst++)
-      {
-        for( int missPosSecond = missPosFirst + 1; missPosSecond < 4; missPosSecond++)
-        {
-          double wordFreq1=0;
-          double wordFreq2=0;
-          for( int missLetterFirst = 0; missLetterFirst < 4; missLetterFirst++)
-          {
-            for( int missLetterSecond = 0; missLetterSecond < 4; missLetterSecond++)
-            {
-              //cout << "missPosFirst," << missPosFirst << ",missPosSecond," << missPosSecond << endl;
-              //cout << "missLetterFirst," << missLetterFirst << ",missLetterSecond," << missLetterSecond << endl; 
-              vector<int> currentWordFour = currentKmerFour;
-              currentWordFour[missPosFirst] = missLetterFirst;
-              currentWordFour[missPosSecond] = missLetterSecond;
-              unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
-              unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
-              wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
-              wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
-              //cout << "missPosFirst," << missPosFirst << ",missPosSecond," << missPosSecond << endl; 
-              //printFour(currentKmerFour);
-              //cout <<  "wordFreq," << wordFreq1 << endl;
-            }
-          }
-          fOneLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
-          fOneLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
-        }
-      }
-      //cout << fOneLetters1[0] << "," << fOneLetters1[1] << "," << fOneLetters1[2] << endl; 
-      //cout << fOneLetters1[0] << "," << fOneLetters1[1] << "," << fOneLetters1[2] << endl;
-      double gamma1 = fabc1 * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] / ( fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] ) ;
-      double gamma2 = fabc2 * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] / ( fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] ) ;
-      gammaTri = gammaTri + fabs( gamma1 - gamma2) ;
-      //cout << gamma1 << ","  << gamma2 << endl;
-      //cout << fabs(gamma1-gamma2) << ".." << gammaTri << endl;
-    }
-    //cout << a << "," << gammaTri << endl;
-    return gammaTri;
-  }
-  
-  double tauTetra = 0;
-  if( k == 4)
-  {
-    for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
-    { 
-      vector<int> currentKmerFour = ten2four(currentKmerTen, k);
-      vector<int> currentKmerRevFour = reverseFour(currentKmerFour);
-      unsigned long currentKmerRevTen = four2ten(currentKmerRevFour, currentKmerFour.size());
-      
-      double fabcd1 = ( HashTable[0][currentKmerTen] + HashTable[0][currentKmerRevTen] ) / double( 2 * totalKmer[0] ) ;
-      double fabcd2 = ( HashTable[1][currentKmerTen] + HashTable[1][currentKmerRevTen] ) / double( 2 * totalKmer[1] ) ;
-      
-      vector<double> fThreeLetters1; // 4 in total
-      vector<double> fThreeLetters2; // 4 in total
-      for( int missPos = 0; missPos < 4; missPos++)
-      {
-        double wordFreq1=0;
-        double wordFreq2=0;
-        for( int missLetter = 0; missLetter < 4; missLetter++)
-        {
-          vector<int> currentWordFour = currentKmerFour;
-          currentWordFour[missPos] = missLetter;
-          unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
-          unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
-          wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
-          wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
-        }
-        fThreeLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
-        fThreeLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
-        
-      }
-      
-      vector<double> fTwoLetters1; // 6 in total
-      vector<double> fTwoLetters2; // 6 in total
-      for( int missPosFirst = 0; missPosFirst < 4; missPosFirst++)
-      {
-        for( int missPosSecond = missPosFirst + 1; missPosSecond < 4; missPosSecond++)
-        {
-          double wordFreq1=0;
-          double wordFreq2=0;
-          for( int missLetterFirst = 0; missLetterFirst < 4; missLetterFirst++)
-          {
-            for( int missLetterSecond = 0; missLetterSecond < 4; missLetterSecond++)
-            {
-              vector<int> currentWordFour = currentKmerFour;
-              currentWordFour[missPosFirst] = missLetterFirst;
-              currentWordFour[missPosSecond] = missLetterSecond;
-              unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
-              unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
-              wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
-              wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
-            }
-          }
-          fTwoLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
-          fTwoLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
-        }
-      }
-
-      vector<double> fOneLetters1; // 4 in total
-      vector<double> fOneLetters2; // 4 in total
-      for( int missPosFirst = 0; missPosFirst < 4; missPosFirst++)
-      {
-        for( int missPosSecond = missPosFirst + 1; missPosSecond < 4; missPosSecond++)
-        {
-          for( int missPosThird = missPosSecond + 1; missPosThird < 4; missPosThird++)
-          {
-            double wordFreq1=0;
-            double wordFreq2=0;
-            for( int missLetterFirst = 0; missLetterFirst < 4; missLetterFirst++)
-            {
-              for( int missLetterSecond = 0; missLetterSecond < 4; missLetterSecond++)
-              {
-                for( int missLetterThird = 0; missLetterThird < 4; missLetterThird++)
-                {
-                  vector<int> currentWordFour = currentKmerFour;
-                  currentWordFour[missPosFirst] = missLetterFirst;
-                  currentWordFour[missPosSecond] = missLetterSecond;
-                  currentWordFour[missPosThird] = missLetterThird;
-                  unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
-                  unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
-                  wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
-                  wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
-                }
-              }
-            }
-            
-            fOneLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
-            fOneLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
-            
-            //cout << missPosFirst << "," << missPosSecond << "," << missPosThird << endl;
-            //cout << fOneLetters1.size() << "," << fOneLetters1[fOneLetters1.size()-1] << endl;
-          }
-        }
-      }
-      //cout << "fTwoLetters1_0," << fTwoLetters1[0] << endl;
-      //cout << fOneLetters1[1] << endl;
-      //cout << fTwoLetters1[1] << endl;
-      //cout << fThreeLetters1[1] << endl;
-      double tau1 = fabcd1 * fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] * fTwoLetters1[3] * fTwoLetters1[4] * fTwoLetters1[5] / ( fThreeLetters1[0] * fThreeLetters1[1] * fThreeLetters1[2] * fThreeLetters1[3] * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] * fOneLetters1[3]) ;
-      
-      double tau2 = fabcd2 * fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] * fTwoLetters2[3] * fTwoLetters2[4] * fTwoLetters2[5] / ( fThreeLetters2[0] * fThreeLetters2[1] * fThreeLetters2[2] * fThreeLetters2[3] * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] * fOneLetters2[3]) ;
-      
-      //cout << "tau1," << tau1 << endl;
-      
-      tauTetra = tauTetra + fabs(tau1 - tau2) ;
-    }
-
-    return tauTetra ;
-  }
-  
-  
+	
+	double deltaDi = 0;
+	//cout << "test" << ", k" << k << endl;
+	
+	// Di
+	if( k == 2 )
+	{
+		
+		for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
+		{
+			//cout << "test" << endl;
+			vector<int> currentKmerFour = ten2four(currentKmerTen, k);
+			vector<int> currentKmerRevFour = reverseFour(currentKmerFour);
+			unsigned long currentKmerRevTen = four2ten(currentKmerRevFour, currentKmerFour.size());
+			
+			//    cout << "test" << endl;
+			
+			// frequency
+			double fab1 = ( HashTable[0][currentKmerTen] + HashTable[0][currentKmerRevTen] ) / double( 2 * totalKmer[0] );
+			double fab2 = ( HashTable[1][currentKmerTen] + HashTable[1][currentKmerRevTen] ) / double( 2 * totalKmer[1] );
+			
+			//cout << "fab1" << fab1 << endl;
+			
+			double fa1 = ( HashTableOrder_1[0][currentKmerFour[0]] + HashTableOrder_1[0][3-currentKmerFour[0]] ) / double( 2 * totalOrder_1[0] );
+			double fb1 = ( HashTableOrder_1[0][currentKmerFour[1]] + HashTableOrder_1[0][3-currentKmerFour[1]] ) / double( 2 * totalOrder_1[0] );
+			
+			double fa2 = ( HashTableOrder_1[1][currentKmerFour[0]] + HashTableOrder_1[1][3-currentKmerFour[0]] ) / double( 2 * totalOrder_1[1] );
+			double fb2 = ( HashTableOrder_1[1][currentKmerFour[1]] + HashTableOrder_1[1][3-currentKmerFour[1]] ) / double( 2 * totalOrder_1[1] );
+			
+			deltaDi = deltaDi + fabs( fab1 / ( fa1 * fb1) - fab2 / ( fa2 * fb2) );
+			
+		}
+		return deltaDi;
+	}
+	
+	double gammaTri = 0;
+	if( k == 3 )
+	{
+		for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
+		{
+			vector<int> currentKmerFour = ten2four(currentKmerTen, k);
+			vector<int> currentKmerRevFour = reverseFour(currentKmerFour);
+			unsigned long currentKmerRevTen = four2ten(currentKmerRevFour, currentKmerFour.size());
+			
+			// frequency
+			double fabc1 = ( HashTable[0][currentKmerTen] + HashTable[0][currentKmerRevTen] ) / double( 2 * totalKmer[0] ) ;
+			double fabc2 = ( HashTable[1][currentKmerTen] + HashTable[1][currentKmerRevTen] ) / double( 2 * totalKmer[1] ) ;
+			
+			vector<double> fTwoLetters1; // 3 in total
+			vector<double> fTwoLetters2; // 3 in total
+			for( int missPos = 0; missPos < 4; missPos++)
+			{
+				double wordFreq1=0;
+				double wordFreq2=0;
+				for( int missLetter = 0; missLetter < 4; missLetter++)
+				{
+					vector<int> currentWordFour = currentKmerFour;
+					currentWordFour[missPos] = missLetter;
+					unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
+					unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
+					wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
+					wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
+				}
+				fTwoLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
+				fTwoLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
+				
+			}
+			
+			vector<double> fOneLetters1; // 3 in total
+			vector<double> fOneLetters2; // 3 in total
+			for( int missPosFirst = 0; missPosFirst < 4; missPosFirst++)
+			{
+				for( int missPosSecond = missPosFirst + 1; missPosSecond < 4; missPosSecond++)
+				{
+					double wordFreq1=0;
+					double wordFreq2=0;
+					for( int missLetterFirst = 0; missLetterFirst < 4; missLetterFirst++)
+					{
+						for( int missLetterSecond = 0; missLetterSecond < 4; missLetterSecond++)
+						{
+							//cout << "missPosFirst," << missPosFirst << ",missPosSecond," << missPosSecond << endl;
+							//cout << "missLetterFirst," << missLetterFirst << ",missLetterSecond," << missLetterSecond << endl;
+							vector<int> currentWordFour = currentKmerFour;
+							currentWordFour[missPosFirst] = missLetterFirst;
+							currentWordFour[missPosSecond] = missLetterSecond;
+							unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
+							unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
+							wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
+							wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
+							//cout << "missPosFirst," << missPosFirst << ",missPosSecond," << missPosSecond << endl;
+							//printFour(currentKmerFour);
+							//cout <<  "wordFreq," << wordFreq1 << endl;
+						}
+					}
+					fOneLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
+					fOneLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
+				}
+			}
+			//cout << fOneLetters1[0] << "," << fOneLetters1[1] << "," << fOneLetters1[2] << endl;
+			//cout << fOneLetters1[0] << "," << fOneLetters1[1] << "," << fOneLetters1[2] << endl;
+			double gamma1 = 0;
+			double gamma2 = 0;
+			if( fTwoLetters1[0] != 0 && fTwoLetters1[1] != 0 && fTwoLetters1[2] != 0 )
+			{
+				gamma1 = fabc1 * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] / ( fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] ) ;
+			}
+			
+			if( fTwoLetters2[0] != 0 && fTwoLetters2[1] != 0 && fTwoLetters2[2] != 0 )
+			{
+				gamma2 = fabc2 * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] / ( fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] ) ;
+			}
+			gammaTri = gammaTri + fabs( gamma1 - gamma2) ;
+			//cout << gamma1 << ","  << gamma2 << endl;
+			//cout << fabs(gamma1-gamma2) << ".." << gammaTri << endl;
+		}
+		//cout << a << "," << gammaTri << endl;
+		return gammaTri;
+	}
+	
+	double tauTetra = 0;
+	if( k == 4)
+	{
+		for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
+		{
+			vector<int> currentKmerFour = ten2four(currentKmerTen, k);
+			vector<int> currentKmerRevFour = reverseFour(currentKmerFour);
+			unsigned long currentKmerRevTen = four2ten(currentKmerRevFour, currentKmerFour.size());
+			
+			double fabcd1 = ( HashTable[0][currentKmerTen] + HashTable[0][currentKmerRevTen] ) / double( 2 * totalKmer[0] ) ;
+			double fabcd2 = ( HashTable[1][currentKmerTen] + HashTable[1][currentKmerRevTen] ) / double( 2 * totalKmer[1] ) ;
+			
+			vector<double> fThreeLetters1; // 4 in total
+			vector<double> fThreeLetters2; // 4 in total
+			for( int missPos = 0; missPos < 4; missPos++)
+			{
+				double wordFreq1=0;
+				double wordFreq2=0;
+				for( int missLetter = 0; missLetter < 4; missLetter++)
+				{
+					vector<int> currentWordFour = currentKmerFour;
+					currentWordFour[missPos] = missLetter;
+					unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
+					unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
+					wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
+					wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
+				}
+				fThreeLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
+				fThreeLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
+				
+			}
+			
+			vector<double> fTwoLetters1; // 6 in total
+			vector<double> fTwoLetters2; // 6 in total
+			for( int missPosFirst = 0; missPosFirst < 4; missPosFirst++)
+			{
+				for( int missPosSecond = missPosFirst + 1; missPosSecond < 4; missPosSecond++)
+				{
+					double wordFreq1=0;
+					double wordFreq2=0;
+					for( int missLetterFirst = 0; missLetterFirst < 4; missLetterFirst++)
+					{
+						for( int missLetterSecond = 0; missLetterSecond < 4; missLetterSecond++)
+						{
+							vector<int> currentWordFour = currentKmerFour;
+							currentWordFour[missPosFirst] = missLetterFirst;
+							currentWordFour[missPosSecond] = missLetterSecond;
+							unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
+							unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
+							wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
+							wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
+						}
+					}
+					fTwoLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
+					fTwoLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
+				}
+			}
+			
+			vector<double> fOneLetters1; // 4 in total
+			vector<double> fOneLetters2; // 4 in total
+			for( int missPosFirst = 0; missPosFirst < 4; missPosFirst++)
+			{
+				for( int missPosSecond = missPosFirst + 1; missPosSecond < 4; missPosSecond++)
+				{
+					for( int missPosThird = missPosSecond + 1; missPosThird < 4; missPosThird++)
+					{
+						double wordFreq1=0;
+						double wordFreq2=0;
+						for( int missLetterFirst = 0; missLetterFirst < 4; missLetterFirst++)
+						{
+							for( int missLetterSecond = 0; missLetterSecond < 4; missLetterSecond++)
+							{
+								for( int missLetterThird = 0; missLetterThird < 4; missLetterThird++)
+								{
+									vector<int> currentWordFour = currentKmerFour;
+									currentWordFour[missPosFirst] = missLetterFirst;
+									currentWordFour[missPosSecond] = missLetterSecond;
+									currentWordFour[missPosThird] = missLetterThird;
+									unsigned long currentWordTen = four2ten(currentWordFour, currentWordFour.size());
+									unsigned long currentWordRevTen = four2ten(reverseFour(currentWordFour), currentWordFour.size());
+									wordFreq1 = wordFreq1 + ( HashTable[0][currentWordTen] + HashTable[0][currentWordRevTen] ) ;
+									wordFreq2 = wordFreq2 + ( HashTable[1][currentWordTen] + HashTable[1][currentWordRevTen] ) ;
+								}
+							}
+						}
+						
+						fOneLetters1.push_back( wordFreq1 / double (2 * totalKmer[0] ) ) ;
+						fOneLetters2.push_back( wordFreq2 / double (2 * totalKmer[1] ) ) ;
+						
+						//cout << missPosFirst << "," << missPosSecond << "," << missPosThird << endl;
+						//cout << fOneLetters1.size() << "," << fOneLetters1[fOneLetters1.size()-1] << endl;
+					}
+				}
+			}
+			//cout << "fTwoLetters1_0," << fTwoLetters1[0] << endl;
+			//cout << fOneLetters1[1] << endl;
+			//cout << fTwoLetters1[1] << endl;
+			//cout << fThreeLetters1[1] << endl;
+			double tau1 = 0;
+			double tau2 = 0;
+			if( fThreeLetters1[0] != 0 && fThreeLetters1[1] != 0 && fThreeLetters1[2] != 0 && fThreeLetters1[3] != 0 )
+			{
+				tau1 = fabcd1 * fTwoLetters1[0] * fTwoLetters1[1] * fTwoLetters1[2] * fTwoLetters1[3] * fTwoLetters1[4] * fTwoLetters1[5] / ( fThreeLetters1[0] * fThreeLetters1[1] * fThreeLetters1[2] * fThreeLetters1[3] * fOneLetters1[0] * fOneLetters1[1] * fOneLetters1[2] * fOneLetters1[3]) ;
+			}
+			
+			if( fThreeLetters2[0] != 0 && fThreeLetters2[1] != 0 && fThreeLetters2[2] != 0 && fThreeLetters2[3] != 0 )
+			{
+				tau2 = fabcd2 * fTwoLetters2[0] * fTwoLetters2[1] * fTwoLetters2[2] * fTwoLetters2[3] * fTwoLetters2[4] * fTwoLetters2[5] / ( fThreeLetters2[0] * fThreeLetters2[1] * fThreeLetters2[2] * fThreeLetters2[3] * fOneLetters2[0] * fOneLetters2[1] * fOneLetters2[2] * fOneLetters2[3]) ;
+			}
+			
+			//cout << "tau1," << tau1 << endl;
+			
+			tauTetra = tauTetra + fabs(tau1 - tau2) ;
+		}
+		
+		return tauTetra ;
+	}
+	
+	
 }
+
+
 
 
 
@@ -1188,9 +1208,9 @@ double HAOcompute(int ZI, int k)
 {
   SCIENTIFIC_NUMBER HAO_above;
   HAO_above.value = 0; HAO_above.factor = 0;
-  SCIENTIFIC_NUMBER HAO_below[2]; 
-  HAO_below[0].value = 0; HAO_below[0].factor = 0; 
-  HAO_below[1].value = 0; HAO_below[1].factor = 0; 
+  SCIENTIFIC_NUMBER HAO_below[2];
+  HAO_below[0].value = 0; HAO_below[0].factor = 0;
+  HAO_below[1].value = 0; HAO_below[1].factor = 0;
   for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++ )
   {
     //vector<int> four (k, 0);

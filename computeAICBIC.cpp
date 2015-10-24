@@ -1588,7 +1588,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
     if(order[speciesID] == 0)
     {
       // load the 1-kmer count for MC: k=order+1
-      cout << "== load the kmer count for MC, order is " << order[speciesID] << " ==" << endl;
+      //cout << "== load the kmer count for MC, order is " << order[speciesID] << " ==" << endl;
       char kmerFileOrder1PathName[1000];
       strcpy(kmerFileOrder1PathName, inputFileDir);
       //strcat(kmerFileOrder1PathName, "/kmerCount/");
@@ -1596,7 +1596,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
       strcat(kmerFileOrder1PathName, "_k");
       strcat(kmerFileOrder1PathName, order1str);
       strcat(kmerFileOrder1PathName, "_singleStrand_wordcount");
-      cout << "kmerFile: " << kmerFileOrder1PathName << endl;
+      //cout << "kmerFile: " << kmerFileOrder1PathName << endl;
       loadKmerCountHash(kmerFileOrder1PathName, speciesID, "kmerOrder+1");
 			
 			AICBICvalues = AICBICcompute(ZI, order[speciesID], speciesID);
@@ -1604,7 +1604,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
     
     }else{
       // load the kmer count for MC: k=order
-      cout << "== load the kmer count for MC, order is " << orderstr << " ==" << endl;
+      //cout << "== load the kmer count for MC, order is " << orderstr << " ==" << endl;
       char kmerFileOrderPathName[1000];
       strcpy(kmerFileOrderPathName, inputFileDir);
       //strcat(kmerFileOrderPathName, "/kmerCount/");
@@ -1612,10 +1612,10 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
       strcat(kmerFileOrderPathName, "_k");
       strcat(kmerFileOrderPathName, orderstr);
       strcat(kmerFileOrderPathName, "_singleStrand_wordcount");
-      cout << "kmerFile: " << kmerFileOrderPathName << endl;
+      //cout << "kmerFile: " << kmerFileOrderPathName << endl;
       loadKmerCountHash(kmerFileOrderPathName, speciesID, "kmerOrder");
       // load the kmer count for MC: k=order+1
-      cout << "== load the kmer count for MC, order+1 is " << order1str << " ==" << endl;
+      //cout << "== load the kmer count for MC, order+1 is " << order1str << " ==" << endl;
       char kmerFileOrder1PathName[1000];
       strcpy(kmerFileOrder1PathName, inputFileDir);
       //strcat(kmerFileOrder1PathName, "/kmerCount/");
@@ -1623,7 +1623,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
       strcat(kmerFileOrder1PathName, "_k");
       strcat(kmerFileOrder1PathName, order1str);
       strcat(kmerFileOrder1PathName, "_singleStrand_wordcount");
-      cout << "kmerFile: " << kmerFileOrder1PathName << endl;
+      //cout << "kmerFile: " << kmerFileOrder1PathName << endl;
       loadKmerCountHash(kmerFileOrder1PathName, speciesID, "kmerOrder+1");
 
 			AICBICvalues = AICBICcompute(ZI, order[speciesID], speciesID);
@@ -1641,14 +1641,14 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		strcat(outputfile,"_order");
 		strcat(outputfile,orderstrA);
 		strcat(outputfile,"_AICBICvalues");
-		ofstream fout(outputfile);
+		//ofstream fout(outputfile);
 		
-		cout << "AIC, " << AICBICvalues[0];
-		cout << "\t BIC, " << AICBICvalues[1] << endl;
-		fout << "AIC, " << AICBICvalues[0] << endl;
-		fout << "BIC, " << AICBICvalues[1] << endl;
+		cout << "AIC " << AICBICvalues[0] << endl;
+		cout << "BIC " << AICBICvalues[1] << endl;
+		//fout << "AIC, " << AICBICvalues[0] << endl;
+		//fout << "BIC, " << AICBICvalues[1] << endl;
 
-		fout.close();
+		//fout.close();
 		
   }
 	

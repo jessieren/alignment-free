@@ -688,9 +688,8 @@ void printD2Feature(int ZI, int k, int order, char *outputFileDir, char *shortNa
 			//cout << "test2.8" << endl;
 			X_w_tilde_var.push_back( SciMultiple(X_w_tilde, SciInverse(SciPow(EX_w,0.5))) );
 			//cout << "test2.9" << endl;
-			SCIENTIFIC_NUMBER aa = SciPow(X_w_tilde_var.back(), 2);
 			//cout << "test2.99" << endl;
-			X_w_tilde_var_norm = SciAddition(X_w_tilde_var_norm, aa);
+			X_w_tilde_var_norm = SciAddition(X_w_tilde_var_norm, SciPow(X_w_tilde_var.back(), 2));
 			
 		}
 		
@@ -713,7 +712,7 @@ void printD2Feature(int ZI, int k, int order, char *outputFileDir, char *shortNa
 	strcat(featureFile,kstr);
 	strcat(featureFile,"_order");
 	strcat(featureFile,orderstr);
-	strcat(featureFile,"_doubleStrand_feature");
+	strcat(featureFile,"_doubleStrand_D2Feature");
 	ofstream featureOutput(featureFile);
 	
 	//cout << "featureFile: " << featureFile << endl;
@@ -722,7 +721,7 @@ void printD2Feature(int ZI, int k, int order, char *outputFileDir, char *shortNa
 	for(unsigned long currentKmerTen = 0; currentKmerTen < pow(ZI, k); currentKmerTen++)
 	{
 		//cout << "test" << endl;
-		SCIENTIFIC_NUMBER featureSci = SciMultiple(X_w_tilde_var[currentKmerTen], SciInverse(X_w_tilde_var_norm));
+		SCIENTIFIC_NUMBER featureSci = SciMultiple(X_w_tilde_var[currentKmerTen], SciInverse(SciPow(X_w_tilde_var_norm, 0.5)));
 		//cout << "featureSci" << TransToReal(featureSci) << endl;
 		featureOutput << currentKmerTen << "," << TransToReal(featureSci) << endl;
 		

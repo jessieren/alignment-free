@@ -736,18 +736,15 @@ void printD2Feature(int ZI, int k, int order, char *outputFileDir, char *shortNa
 
 
 // compute EuFeature using double strand
-void printEuFeature(int ZI, int k, int order, char *outputFileDir, char *shortName)
+void printEuFeature(int ZI, int k, char *outputFileDir, char *shortName)
 {
 	char kstr[5]; sprintf(kstr, "%d", k);
-	char orderstr[5]; sprintf(orderstr, "%d", order);
 	char featureFile[1000];
 	
 	strcpy(featureFile,outputFileDir);
 	strcat(featureFile,shortName);
 	strcat(featureFile,"_k");
 	strcat(featureFile,kstr);
-	strcat(featureFile,"_order");
-	strcat(featureFile,orderstr);
 	strcat(featureFile,"_doubleStrand_EuFeature");
 	ofstream featureOutput(featureFile);
 	
@@ -1568,7 +1565,6 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 {
 	//bool doubleStrand = false;
 	char *speciesName = NULL;
-	int order;
 	
 	int k = 0;
 	char kstr[5];
@@ -1588,7 +1584,6 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			//{"doubleStrand",     no_argument,       0, 'd'},
 			// necessary arguments: kvalue and inputFileName !!
 			{"species",  required_argument, 0, 'a'},
-			{"order",  required_argument, 0, 'b'},
 			{"kvalue",  required_argument, 0, 'k'},
 			{"inputFileDir",  required_argument, 0, 'i'},
 			{"outputFileDir",  required_argument, 0, 'o'},
@@ -1598,7 +1593,7 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
 		
-		c = getopt_long (argc, argv, "a:b:k:i:o:s:",
+		c = getopt_long (argc, argv, "a:k:i:o:s:",
 										 long_options, &option_index);
 		
 		/* Detect the end of the options. */
@@ -1618,11 +1613,6 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 			case 'a':
 				speciesName = optarg;
 				//printf ("option -a, name of the species, with value `%s'\n", optarg);
-				break;
-				
-			case 'b':
-				order = atoi(optarg);
-				//printf ("option -b, order of the species, with value `%s'\n", optarg);
 				break;
 				
 			case 'k':
@@ -1676,18 +1666,6 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 	//////////////////// load the kmerFiles and compute pwMC //////////////
 	///////////////////////////////////////////////////////////////////////
 
-  vector<SCIENTIFIC_NUMBER> iniProb;
-	//vector<vector<vector<SCIENTIFIC_NUMBER> > > transMatrix (1, vector<vector<SCIENTIFIC_NUMBER> > (pow(ZI,order), vector<SCIENTIFIC_NUMBER> (ZI)));
-	vector<vector<SCIENTIFIC_NUMBER> > transMatrix(pow(ZI,order), std::vector<SCIENTIFIC_NUMBER>(ZI));
-  
-  // load the kmer count hashtables of the two dataset
-
-	//cout << "======= species " << speciesName[speciesID] << " order " << order[speciesID] << endl;
-	char orderstr[5];
-	sprintf(orderstr, "%d", order);
-	char order1str[5];
-	sprintf(order1str, "%d", (order+1));
-	
 	///panfs/cmb-panasas2/renj/10species/rn5/rn5_d1_k14_d0_singleStrand_wordcount
 	// load the kmer count
 	//cout << "== load the kmer count ==" << endl;
@@ -1701,60 +1679,9 @@ int main(int argc, char **argv)   //EDIT main(int argc, char *argv[])
 	//cout << "kmerFile: " << kmerFilePathName << endl;
 	loadKmerCountHash(kmerFilePathName, "kmerCount");
 	
-	if(order == 0)
-	{
-		// load the 1-kmer count for MC: k=order+1
-		//cout << "== load the kmer count for MC, order is " << order[speciesID] << " ==" << endl;
-		char kmerFileOrder1PathName[1000];
-		strcpy(kmerFileOrder1PathName, inputFileDir);
-		//strcat(kmerFileOrder1PathName, "/kmerCount/");
-		strcat(kmerFileOrder1PathName, speciesName);
-		strcat(kmerFileOrder1PathName, "_k");
-		strcat(kmerFileOrder1PathName, order1str);
-		strcat(kmerFileOrder1PathName, "_singleStrand_wordcount");
-		//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
-		loadKmerCountHash(kmerFileOrder1PathName, "kmerOrder+1");
-
-		
-		// compute the pw
-		//cout << "== compute the pwIID for the words, for D2-type and S2 == " << endl;
-		//pwIID(ZI, k);
-			
-	
-	}else{
-		// load the kmer count for MC: k=order
-		//cout << "== load the kmer count for MC, order is " << orderstr << " ==" << endl;
-		char kmerFileOrderPathName[1000];
-		strcpy(kmerFileOrderPathName, inputFileDir);
-		//strcat(kmerFileOrderPathName, "/kmerCount/");
-		strcat(kmerFileOrderPathName, speciesName);
-		strcat(kmerFileOrderPathName, "_k");
-		strcat(kmerFileOrderPathName, orderstr);
-		strcat(kmerFileOrderPathName, "_singleStrand_wordcount");
-		//cout << "kmerFile: " << kmerFileOrderPathName << endl;
-		loadKmerCountHash(kmerFileOrderPathName, "kmerOrder");
-		// load the kmer count for MC: k=order+1
-		//cout << "== load the kmer count for MC, order+1 is " << order1str << " ==" << endl;
-		char kmerFileOrder1PathName[1000];
-		strcpy(kmerFileOrder1PathName, inputFileDir);
-		//strcat(kmerFileOrder1PathName, "/kmerCount/");
-		strcat(kmerFileOrder1PathName, speciesName);
-		strcat(kmerFileOrder1PathName, "_k");
-		strcat(kmerFileOrder1PathName, order1str);
-		strcat(kmerFileOrder1PathName, "_singleStrand_wordcount");
-		//cout << "kmerFile: " << kmerFileOrder1PathName << endl;
-		loadKmerCountHash(kmerFileOrder1PathName, "kmerOrder+1");
-
-		// compute the pw
-		//cout << "== compute the pw for the words == " << endl;
-		//pwMC(ZI, k, order, iniProb, transMatrix);
-		//cout << "== finish compute the pw for the words == " << endl;
-		
-	}
-	
 	// print D2Features
 	//cout << "=== print D2Features ===" << endl;
-	printEuFeature(ZI, k, order, outputFileDir, shortName);
+	printEuFeature(ZI, k, outputFileDir, shortName);
 	//cout << "=== print D2Features ===" << endl;
   
 	return 0;
